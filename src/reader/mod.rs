@@ -22,11 +22,14 @@ use bytecount;
 
 use failure::Error;
 // use failure::err_msg;
+#[macro_use]
+pub mod macro_src;
 
 pub mod int_reader;
 pub mod uint_reader;
 pub mod float_reader;
 
+pub use self::macro_src::*;
 pub use self::int_reader::*;
 pub use self::uint_reader::*;
 pub use self::float_reader::*;
@@ -38,27 +41,7 @@ pub enum Delimiter{
     Any(u8),
 }
 
-///The different data types that we support the ability to parse from a file. 
-pub enum DataType{
-    Float32,
-    Float64,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Int128,
-    Uint8,
-    Uint16,
-    Uint32,
-    Uint64,
-    Uint128,
-    Uintsize,
-    Boolean,
-    Strings,
-}
-
 ///ReaderParams tells us what our reader should be doing.
-///dtype - the data type of our outputted vector. We currently only support one type.
 ///delimiter - the delimiter that tells us what our data fields are seperated by
 ///skip_header - an optional field that tells us whether or not we should skip so many lines that are not
 ///     comment lines from the beginning of the file
@@ -67,7 +50,6 @@ pub enum DataType{
 ///usecols - an optional field that tells us what column numbers we should be using from the data field
 ///max_rows - an optional field that tells us the maximum number of rows we should use from the file
 pub struct ReaderParams{
-    pub dtype: String,
     pub comments: u8,
     pub delimiter: Delimiter,
     pub skip_header: Option<usize>,
@@ -80,7 +62,6 @@ pub struct ReaderParams{
 impl Default for ReaderParams{
     fn default() -> ReaderParams {
         ReaderParams{
-            dtype: String::from("String"),
             comments: b'#',
             delimiter: Delimiter::WhiteSpace,
             skip_header: None,
