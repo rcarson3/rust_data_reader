@@ -17,11 +17,19 @@ use std::vec::*;
 use std::str;
 use std::str::{FromStr};
 use std::fs::File;
-use std::io::{Read, BufRead, BufReader, Seek, SeekFrom};
+use std::io::{Read, BufReader, SeekFrom};
 use bytecount;
 
 use failure::Error;
-use failure::err_msg;
+// use failure::err_msg;
+
+pub mod int_reader;
+pub mod uint_reader;
+pub mod float_reader;
+
+pub use self::int_reader::*;
+pub use self::uint_reader::*;
+pub use self::float_reader::*;
 
 const BUF_SIZE: usize = 8 * (1<<10);
 ///The type of delimiter that we can use
@@ -135,142 +143,3 @@ pub fn read_num_file_lines(f: &mut File, com: u8) -> usize{
 
     count
 }
-
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
-pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>, Error>{
-
-    let mut file = File::open(f)?;
-
-    let num_lines = read_num_file_lines(&mut file, params.comments);
-
-    file.seek(SeekFrom::Start(0))?;
-
-    let mut reader = BufReader::new(file);
-
-    let mut line = String::new();
-
-    let mut results = ReaderResults{
-        num_fields: 0,
-        num_lines: 0,
-        results: Vec::<i32>::new(),
-    };
-
-    match &params.skip_header{
-        Some(x) => {
-            if *x >= num_lines{
-                return Err(format_err!("Input for skip_header greater than the number of readable lines in the file"));
-            }
-        }
-        None => (),
-    }
-
-    let sk_h = if let Some(x) = params.skip_header{
-        x
-    }else{
-        0
-    };
-
-    match &params.skip_footer{
-        Some(x) => {
-            if *x >= num_lines {
-                return Err(format_err!("Input for skip_footer greater than the number of readable lines in the file"));
-            }
-        }
-        None => (),
-    }
-
-    let sk_f = if let Some(x) = params.skip_footer{
-        x
-    }else{
-        0
-    };
-
-    if num_lines <= (sk_h + sk_f) {
-        return Err(format_err!("Input for skip_footer and skip_header greater than or equal to the number of readable lines in the file"));
-    }
-
-    let num_lines_read = match &params.max_rows{
-        Some(x) => {
-                let diff_lines = num_lines - sk_h - sk_f;
-                if diff_lines > *x {
-                    *x
-                }else{
-                    diff_lines
-                }
-            }
-        None => (num_lines - sk_h - sk_f)
-    };
-    let tmp = [params.comments.clone()];
-    let comment = str::from_utf8(&tmp).unwrap();
-    
-    //File line number used for Error information
-    let mut fln = 0;
-    if sk_h > 0{
-        let mut n_line_skip = 0;
-        while reader.read_line(&mut line).unwrap() > 0{
-            fln += 1;
-            if !line.starts_with(&comment){
-                n_line_skip += 1; 
-            }
-            if n_line_skip == sk_h {
-                line.clear();
-                break;
-            }
-            //clear our buffer
-            line.clear();
-        }
-    }
-
-    //Loop through the rest of the file until we either reach the end or the maximum number of lines that we want.
-    while reader.read_line(&mut line).unwrap() > 0{
-        fln += 1;
-        if !line.starts_with(&comment){
-            //I really don't like that I have to clone this...
-            let tmp_line = line.clone();
-            //clear our buffer
-
-            results.num_lines += 1;
-            //I also am not happy about having to create this each time it gets a new line.
-            //Later versions will have to go about it by streaming the bytes and just dealing with the
-            //ascii/utf-8 data directly like rust_csv.
-            let line_split_vec: Vec<&str> = match &params.delimiter{
-                Delimiter::WhiteSpace => {
-                    tmp_line.split_whitespace().collect()
-                }
-                Delimiter::Any(b) => {   
-                    tmp_line.split(str::from_utf8(&[*b]).unwrap()).collect()
-                }
-            };
-            if results.num_lines == 1 {
-                results.num_fields = line_split_vec.len();
-            }
-
-            if line_split_vec.len() != results.num_fields {
-                println!("Contents of line_split_vec {:?}", line_split_vec);
-                return Err(format_err!("Number of fields provided at line {} is different than the initial field number of {}", fln, results.num_fields));
-            }
-
-            match &params.usecols{
-                Some(x) =>{
-                    results.results.extend({
-                            x.iter().map(|y| i32::from_str(line_split_vec[*y].trim()).unwrap())
-                        });
-                }
-                None =>{
-                    results.results.extend({
-                        line_split_vec.iter().map(|x| i32::from_str(x.trim()).unwrap())
-                    });
-                }
-            }
-        }
-        if results.num_lines == num_lines_read {
-            break;
-        }
-
-        line.clear();
-    }
-
-    Ok(results)
-}
-
