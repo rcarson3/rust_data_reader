@@ -208,26 +208,27 @@ pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>
     let mut fln = 0;
     if sk_h > 0{
         let mut n_line_skip = 0;
-        loop{
-            reader.read_line(&mut line)?;
+        while reader.read_line(&mut line).unwrap() > 0{
             fln += 1;
-            if !line.starts_with(comment){
+            if !line.starts_with(&comment){
                 n_line_skip += 1; 
             }
             if n_line_skip == sk_h {
+                line.clear();
                 break;
             }
+            //clear our buffer
+            line.clear();
         }
     }
 
     //Loop through the rest of the file until we either reach the end or the maximum number of lines that we want.
-    while   reader.read_line(&mut line).unwrap() > 0{
+    while reader.read_line(&mut line).unwrap() > 0{
         fln += 1;
-        if !line.starts_with(comment){
+        if !line.starts_with(&comment){
             //I really don't like that I have to clone this...
             let tmp_line = line.clone();
             //clear our buffer
-            line.clear();
 
             results.num_lines += 1;
             //I also am not happy about having to create this each time it gets a new line.
@@ -266,6 +267,8 @@ pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>
         if results.num_lines == num_lines_read {
             break;
         }
+
+        line.clear();
     }
 
     Ok(results)
