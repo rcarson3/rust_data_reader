@@ -22,13 +22,16 @@ use bytecount;
 
 use failure::Error;
 // use failure::err_msg;
+
 #[macro_use]
+#[doc(hidden)]
 pub mod macro_src;
 
 pub mod int_reader;
 pub mod uint_reader;
 pub mod float_reader;
 
+#[doc(hidden)]
 pub use self::macro_src::*;
 pub use self::int_reader::*;
 pub use self::uint_reader::*;

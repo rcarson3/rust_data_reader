@@ -24,6 +24,7 @@
 ///Output - A Result type that either contains a ReaderResults structure or an error. 
 ///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
 ///A note needs to be added that this needs to better commented at this point.
+#[doc(hidden)]
 macro_rules! load_text {
     ($f:expr, $params:expr, $type: ident) => {
         {
