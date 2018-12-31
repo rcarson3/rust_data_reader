@@ -19,6 +19,7 @@ use std::str::{FromStr};
 use std::fs::File;
 use std::io::{Read, BufReader, SeekFrom};
 use bytecount;
+use lexical;
 
 use failure::Error;
 // use failure::err_msg;
