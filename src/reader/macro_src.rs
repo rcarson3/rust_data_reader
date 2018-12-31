@@ -24,6 +24,7 @@
 ///Output - A Result type that either contains a ReaderResults structure or an error. 
 ///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
 ///A note needs to be added that this needs to better commented at this point.
+
 #[doc(hidden)]
 macro_rules! load_text {
     ($f:expr, $params:expr, $type: ident) => {
@@ -171,16 +172,19 @@ macro_rules! load_text {
                 match &$params.usecols{
                     Some(x) =>{
                         results.results.extend({
-                                x.iter().map(|y| $type::from_str(line_split_vec[*y].trim()).unwrap())
+                                x.iter().map(|y| lexical::parse::<$type, _>(line_split_vec[*y].trim()))
+                                //$type::from_str(line_split_vec[*y].trim()).unwrap())
                             });
                     }
                     None =>{
                         results.results.extend({
-                            line_split_vec.iter().map(|x| $type::from_str(x.trim()).unwrap())
+                            line_split_vec.iter().map(|x| lexical::parse::<$type, _>(x.trim()))
+                            //$type::from_str(x.trim()).unwrap()
                         });
                     }
                 }
             }
+
             //Break out of the loop early if we've read all of the lines that we need to read.
             if results.num_lines == num_lines_read {
                 break;
