@@ -326,14 +326,19 @@ fn load_txt_f32_sci_test(){
 
     let params_ref = &params;
 
-    let results = load_txt_f32(file_ref, params_ref);
+    // let mut results2 = Vec::<f32>::new();
+    // let line_split_vec = vec!["1e0", "2e0", "3e0"];
+    // results2.extend({line_split_vec.iter().map(|x| lexical::try_parse::<f32, _>(x.trim()).unwrap())});
+    // println!("{:?}", results2);
 
     // match results{
     //     Ok(results) => println!("Number of lines {}\nNumber of fields {}\nResults {:?}",results.num_lines, results.num_fields, results.results),
     //     Err(err) => println!("Error {:?}", err),
     // }
 
+    let results = load_txt_f32(file_ref, params_ref);
+
     assert_eq!(results.unwrap().results, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0]);
 
-    //assert_eq!(results.unwrap().results, results2.unwrap().results);
+    // assert_eq!(results.unwrap().results, results2.unwrap().results);
 }

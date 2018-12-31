@@ -172,14 +172,18 @@ macro_rules! load_text {
                 match &$params.usecols{
                     Some(x) =>{
                         results.results.extend({
-                                x.iter().map(|y| lexical::parse::<$type, _>(line_split_vec[*y].trim()))
-                                //$type::from_str(line_split_vec[*y].trim()).unwrap())
+                                x.iter().map(|y| {
+                                    lexical::try_parse::<$type, _>(line_split_vec[*y].trim()).unwrap()
+                                    //$type::from_str(line_split_vec[*y].trim()).unwrap())
+                                })
                             });
                     }
                     None =>{
                         results.results.extend({
-                            line_split_vec.iter().map(|x| lexical::parse::<$type, _>(x.trim()))
-                            //$type::from_str(x.trim()).unwrap()
+                            line_split_vec.iter().map(|x| {
+                                lexical::try_parse::<$type, _>(x.trim()).unwrap()
+                                //$type::from_str(x.trim()).unwrap()
+                            })
                         });
                     }
                 }
