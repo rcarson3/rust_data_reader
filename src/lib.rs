@@ -53,6 +53,7 @@
 extern crate bytecount;
 #[macro_use]
 extern crate failure;
+extern crate lexical;
 
 ///Contains all of the functions related to the different readers that will be generated.
 pub mod reader; 

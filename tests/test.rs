@@ -1,4 +1,5 @@
 extern crate rust_data_reader;
+extern crate lexical;
 use rust_data_reader::reader::*;
 
 use std::fs::File;
@@ -287,7 +288,7 @@ fn load_txt_usize_test(){
 //The test file for this has 0 commented lines in it
 #[test]
 fn load_txt_f32_test(){
-    let file = String::from("int_testv2.txt");
+    let file = String::from("float_testv1.txt");
 
     let params = ReaderParams{
         comments: b'%',
@@ -327,8 +328,6 @@ fn load_txt_f32_sci_test(){
 
     let results = load_txt_f32(file_ref, params_ref);
 
-    // let results2 = load_txt!(file_ref, params_ref, f32);
-
     // match results{
     //     Ok(results) => println!("Number of lines {}\nNumber of fields {}\nResults {:?}",results.num_lines, results.num_fields, results.results),
     //     Err(err) => println!("Error {:?}", err),
@@ -336,5 +335,5 @@ fn load_txt_f32_sci_test(){
 
     assert_eq!(results.unwrap().results, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0]);
 
-    // assert_eq!(results.unwrap().results, results2.unwrap().results);
+    //assert_eq!(results.unwrap().results, results2.unwrap().results);
 }

@@ -15,7 +15,21 @@ categories = ["data-structures", "science"]
 
 [dependencies]
 #ndarray = {version = "0.11.1", optional = "true"} 
-bytecount = "0.3.2"
-failure = "0.1.2"
+bytecount = "0.4.0"
+failure = "0.1.4"
+lexical = "2.0.0"
+
 [dev-dependencies]
-csv = "1.0.1" 
+criterion = "0.2.7"
+
+[[bench]]
+name = "examples"
+harness = false
+[profile.release]
+opt-level = 3
+lto = true
+[profile.dev]
+opt-level = 3
+[profile.bench]
+opt-level = 3
+
