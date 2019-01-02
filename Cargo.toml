@@ -13,8 +13,7 @@ description = "An attempt to create a data loading library for data scientist. "
 keywords = ["data-reader"]
 categories = ["data-structures", "science"]
 
-[dependencies]
-#ndarray = {version = "0.11.1", optional = "true"} 
+[dependencies] 
 bytecount = "0.4.0"
 failure = "0.1.4"
 lexical = "2.0.0"
@@ -25,11 +24,43 @@ criterion = "0.2.7"
 [[bench]]
 name = "examples"
 harness = false
-[profile.release]
-opt-level = 3
-lto = true
-[profile.dev]
-opt-level = 3
-[profile.bench]
-opt-level = 3
-
+# [profile.release]
+# opt-level = 3
+# debug = false
+# rpath = false
+# lto = false
+# debug-assertions = true
+# codegen-units = 16
+# panic = 'unwind'
+# incremental = false
+# overflow-checks = false
+# [profile.dev]
+# opt-level = 3
+# debug = false
+# rpath = false
+# lto = false
+# debug-assertions = true
+# codegen-units = 16
+# panic = 'unwind'
+# incremental = false
+# overflow-checks = false
+# [profile.bench]
+# opt-level = 3
+# debug = false
+# rpath = false
+# lto = false
+# debug-assertions = true
+# codegen-units = 16
+# panic = 'unwind'
+# incremental = false
+# overflow-checks = false
+# [profile.test]
+# opt-level = 3
+# debug = false
+# rpath = false
+# lto = false
+# debug-assertions = true
+# codegen-units = 16
+# panic = 'unwind'
+# incremental = false
+# overflow-checks = false
