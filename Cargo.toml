@@ -16,6 +16,7 @@ categories = ["data-structures", "science"]
 [dependencies] 
 bytecount = "0.4.0"
 failure = "0.1.4"
+
 lexical = "2.0.0"
 
 [dev-dependencies]

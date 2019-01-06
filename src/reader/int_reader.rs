@@ -23,8 +23,6 @@ use std::io::{BufRead, Seek};
 ///Input - f is simply the location of the file.
 ///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
 ///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
 pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<ReaderResults<i8>, Error>{
     load_text!(f, params, i8)
 }

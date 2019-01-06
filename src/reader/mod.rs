@@ -31,12 +31,14 @@ pub mod macro_src;
 pub mod int_reader;
 pub mod uint_reader;
 pub mod float_reader;
+pub mod prim_reader;
 
 #[doc(hidden)]
 pub use self::macro_src::*;
 pub use self::int_reader::*;
 pub use self::uint_reader::*;
 pub use self::float_reader::*;
+pub use self::prim_reader::*;
 
 const BUF_SIZE: usize = 8 * (1<<10);
 ///The type of delimiter that we can use
