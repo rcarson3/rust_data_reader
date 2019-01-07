@@ -48,13 +48,18 @@ pub enum Delimiter{
 }
 
 ///ReaderParams tells us what our reader should be doing.
+///
 ///delimiter - the delimiter that tells us what our data fields are seperated by
-///skip_header - an optional field that tells us whether or not we should skip so many lines that are not
+///
+/// skip_header - an optional field that tells us whether or not we should skip so many lines that are not
 ///     comment lines from the beginning of the file
-///skip_footer - an optional field that tells us whether or not we should skip so many lines that are not
+///
+/// skip_footer - an optional field that tells us whether or not we should skip so many lines that are not
 ///     comment lines from the end of the file
-///usecols - an optional field that tells us what column numbers we should be using from the data field
-///max_rows - an optional field that tells us the maximum number of rows we should use from the file
+///
+/// usecols - an optional field that tells us what column numbers we should be using from the data field
+///
+/// max_rows - an optional field that tells us the maximum number of rows we should use from the file
 pub struct ReaderParams{
     pub comments: u8,
     pub delimiter: Delimiter,
@@ -80,7 +85,7 @@ impl Default for ReaderParams{
 
 ///A structure that contains all of the results. It tells us the number of fields we had
 ///along with the number of lines that we read. Finally, the results are stored in a single Vec of
-///type T. Type T is dependent on what was supplied to ReaderParams for dtype.
+///type T. Type T is what type one called load_txt_* for.
 pub struct ReaderResults<T: FromStr>{
     pub num_fields: usize,
     pub num_lines: usize,
@@ -112,7 +117,8 @@ pub fn read_num_file_tot_lines(f: &mut File) -> usize{
 
 ///It simply reads all of the lines in the file when an end of line is denoted by \n. 
 ///A comment character is provided and if it is seen then it is not counted in the total.
-///Note it is assummed that the comment character only appears at the beginning of a line and nowhere else.
+///
+/// Note it is assummed that the comment character only appears at the beginning of a line and nowhere else.
 ///If it does appear in more then one location this will currently provide the incorrect number of lines per
 ///the file. A more careful solution could be introduced which does not take advantage of this quick method.
 pub fn read_num_file_lines(f: &mut File, com: u8) -> usize{

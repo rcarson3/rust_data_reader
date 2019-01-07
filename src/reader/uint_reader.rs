@@ -20,11 +20,16 @@ use std::io::{BufRead, Seek};
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file. 
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, Error>{
     load_text!(f, params, u8)
 }
@@ -35,11 +40,16 @@ pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, 
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>, Error>{
     load_text!(f, params, u16)
 }
@@ -50,11 +60,16 @@ pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file. 
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>, Error>{
     load_text!(f, params, u32)
 }
@@ -64,11 +79,16 @@ pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>, Error>{
     load_text!(f, params, u64)
 }
@@ -78,11 +98,16 @@ pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u128>, Error>{
     load_text!(f, params, u128)
 }
@@ -92,11 +117,17 @@ pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u12
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// 
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<ReaderResults<usize>, Error>{
     load_text!(f, params, usize)
 }

@@ -20,11 +20,16 @@ use std::io::{BufRead, Seek};
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+/// 
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>, Error>{
     load_text!(f, params, f32)
 }
@@ -34,11 +39,17 @@ pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file. 
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
+
 pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error>{
     load_text!(f, params, f64)
 }
@@ -48,11 +59,18 @@ pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+/// This function makes use of lexical's lossy algorithms, so it's only good to machine precision.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_lossy_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>, Error>{
     load_text_lossy!(f, params, f32)
 }
@@ -62,11 +80,18 @@ pub fn load_txt_lossy_f32(f: &str, params: &ReaderParams) -> Result<ReaderResult
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-///Input - f is simply the location of the file.
-///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-///Output - A Result type that either contains a ReaderResults structure or an error. 
-///Temporary solution but once this has been written we should be able to create a macro that generates all of this for us...
-///A note needs to be added that this needs to better commented at this point.
+/// 
+/// This function makes use of lexical's lossy algorithms, so it's only good to machine precision.
+/// 
+///Input - 
+/// 
+/// f is simply the location of the file.
+///        
+/// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
+/// 
+///Output - 
+/// 
+/// A Result type that either contains a ReaderResults structure or an error. 
 pub fn load_txt_lossy_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error>{
     load_text_lossy!(f, params, f64)
 }
