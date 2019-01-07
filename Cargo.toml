@@ -1,10 +1,10 @@
 [package]
-name = "rust_data_reader"
+name = "data_reader"
 version = "0.1.0"
 authors = ["rcarson3 <rac428@cornell.edu>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
-publish = false
+publish = true
 
 repository = "https://github.com/rcarson3/rust_data_reader/"
 
@@ -15,16 +15,16 @@ categories = ["data-structures", "science"]
 
 [dependencies] 
 bytecount = "0.4.0"
-failure = "0.1.4"
+failure = "0.1.5"
 
 lexical = "2.0.0"
 
 [dev-dependencies]
 criterion = "0.2.7"
 
-[[bench]]
-name = "examples"
-harness = false
+# [[bench]]
+# name = "examples"
+# harness = false
 # [profile.release]
 # opt-level = 3
 # debug = false

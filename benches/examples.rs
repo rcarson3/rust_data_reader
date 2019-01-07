@@ -1,5 +1,5 @@
-extern crate rust_data_reader;
-use rust_data_reader::reader::*;
+extern crate data_reader;
+use data_reader::reader::*;
 
 #[macro_use]
 extern crate criterion;

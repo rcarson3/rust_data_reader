@@ -1,6 +1,6 @@
-extern crate rust_data_reader;
+extern crate data_reader;
 extern crate lexical;
-use rust_data_reader::reader::*;
+use data_reader::reader::*;
 
 use std::fs::File;
 use std::io::prelude::*;
