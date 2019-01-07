@@ -15,8 +15,8 @@ categories = ["data-structures", "science"]
 
 exclude = [
     "*.txt",
-    "/tests",
-    "/benches",
+    "/tests/*",
+    "/benches/*",
 ]
 
 [dependencies] 
