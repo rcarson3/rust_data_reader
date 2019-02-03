@@ -2,11 +2,10 @@
 
 So far this code provides some similar capabilities as Numpy's loadtxt to Rust. It is currently intended to read in data that you know how it's been generated. The default delimiter is any whitespace character. The following caviates currently exist:
 
-1.  New lines are assummed to end with ```\n```.
-2.  Comment characters only appear once per line.
-3.  If the code fails to convert from a string to the supported type it will fail.
-4.  Whitespaces are stripped from the front and end of whatever string is between delimeters.
-5.  All of the data being read in needs to be the same type. 
+1.  New line and commented lines are not counted in the lines that you want skipped or that have been read.
+2.  If the code fails to convert from a string to the supported type it will fail.
+3.  Whitespaces are stripped from the front and end of whatever string is between delimeters.
+4.  All of the data being read in needs to be the same type. 
 
 It provides support for the following types:
 
@@ -17,17 +16,18 @@ f32 f64
 char bool String
 ```
 
-The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, you should expect roughly a 100MB/s for the read in. 
+The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, you should expect roughly a 88MB/s for the read in. 
 
 If your data file doesn't meet these types you might want to look into BurntSushi's CSV crate for your needs.
 
 # Roadmap
-Provide more alternative methods to count the line of text and commented lines that are more robust then the quick method that's being used now.
-
 Update the backend such that it makes it possible to have multiple data types in the file being read.
 
 Update the backend to provide better performance. 
 
+New backend should look closer to what's currently being done in BurntSushi's CSV crate.
+
+Provide access to a macro to build the reader into their own code which could give the compiler the necessary information to optimize away dead branches.
 
 # Example
 An example of how to use the code can be seen down below:
@@ -59,4 +59,12 @@ fn load_txt_i32_test_sk_f(){
 
 }
 ```
+
+# Versions
+
+* 0.1.2 - Updated the comment and newline tracking portion of the code. The code now properly skips over new lines and commented lines that start with whitespace. It also can no handle lines with multiple comment characters in it without counting that line multiple times. A performance regression was created by properly handling these cases from the 0.1.1 and 0.1.0 releases.
+
+* 0.1.1 - Needed to update documentation for docs.rs
+
+* 0.1.0 - Initial crates.io release
 

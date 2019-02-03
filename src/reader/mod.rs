@@ -17,7 +17,7 @@ use std::vec::*;
 use std::str;
 use std::str::{FromStr};
 use std::fs::File;
-use std::io::{Read, BufReader, SeekFrom};
+use std::io::{Read, BufReader, BufRead, SeekFrom};
 use bytecount;
 use lexical;
 
@@ -121,18 +121,44 @@ pub fn read_num_file_tot_lines(f: &mut File) -> usize{
 /// Note it is assummed that the comment character only appears at the beginning of a line and nowhere else.
 ///If it does appear in more then one location this will currently provide the incorrect number of lines per
 ///the file. A more careful solution could be introduced which does not take advantage of this quick method.
-pub fn read_num_file_lines(f: &mut File, com: u8) -> usize{
-    let mut buffer = vec![0u8; BUF_SIZE];
+// pub fn read_num_file_lines(f: &mut File, com: u8) -> usize{
+//     let mut buffer = vec![0u8; BUF_SIZE];
+//     let mut count = 0;
+
+//     loop{
+//         let length = f.read(buffer.as_mut_slice()).unwrap();
+//         count += count_lines(&buffer[0..length], b'\n');
+//         count -= count_lines(&buffer[0..length], com);
+//         if length < BUF_SIZE{
+//             break;
+//         }
+//     }
+
+//     count
+// }
+
+pub fn read_num_file_lines(f: &File, com: u8) -> usize{
+    
+    let tmp = [com.clone()];
+    let comment = str::from_utf8(&tmp).unwrap();
     let mut count = 0;
 
-    loop{
-        let length = f.read(buffer.as_mut_slice()).unwrap();
-        count += count_lines(&buffer[0..length], b'\n');
-        count -= count_lines(&buffer[0..length], com);
-        if length < BUF_SIZE{
-            break;
+    //We are now creating a reader buffer to easily read through our file
+    let mut reader = BufReader::new(f);
+    //An allocated string to read in the buffer file.
+    let mut line = String::new();
+
+    //Very way to count the total number of useable lines.
+    while reader.read_line(&mut line).unwrap() > 0{
+        //Here we're checking to see if we've run across a blank line or
+        //a commented line.
+        if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
+            count += 1;
         }
+        //clear our buffer
+        line.clear();
     }
 
     count
+
 }

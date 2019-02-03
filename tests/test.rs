@@ -15,7 +15,7 @@ fn read_num_file_line_test(){
    file.seek(SeekFrom::Start(0)).unwrap();
    let num_lines = read_num_file_lines(&mut file, b'#');
    println!("The number of lines in the file minus comments is {}", num_lines);
-   assert_eq!((tot_num_lines - num_lines), 0);
+   assert_eq!((tot_num_lines - num_lines), 32);
    
    let mut file = File::open("int_testv3.txt").unwrap();
    let tot_num_lines = read_num_file_tot_lines(&mut file);
@@ -24,7 +24,7 @@ fn read_num_file_line_test(){
    file.seek(SeekFrom::Start(0)).unwrap();
    let num_lines = read_num_file_lines(&mut file, b'%');
    println!("The number of lines in the file minus comments is {}", num_lines);
-   assert_eq!((tot_num_lines - num_lines), 3);
+   assert_eq!((tot_num_lines - num_lines), 5);
 }
 
 //The test file for this has 0 commented lines in it
