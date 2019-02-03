@@ -114,7 +114,7 @@ macro_rules! load_text {
                 fln += 1;
                 //Checking to see if the line is a comment or not
                 //if it is increment our counter
-                if !line.starts_with(&comment){
+                if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                     n_line_skip += 1; 
                 }
                 //If we've reached the number of lines to skip
@@ -131,7 +131,8 @@ macro_rules! load_text {
         //Loop through the rest of the file until we either reach the end or the maximum number of lines that we want.
         while reader.read_line(&mut line).unwrap() > 0{
             fln += 1;
-            if !line.starts_with(&comment){
+            // let tline = line.trim_left().to_string();
+            if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                 //I really don't like that I have to clone this...
                 //It also forces the issue of having to potentially reallocate a string each time.
                 //If it wasn't for the line split issue down below this probably wouldn't be an issue at all.
@@ -290,7 +291,7 @@ macro_rules! load_text_lossy {
                 fln += 1;
                 //Checking to see if the line is a comment or not
                 //if it is increment our counter
-                if !line.starts_with(&comment){
+                if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                     n_line_skip += 1; 
                 }
                 //If we've reached the number of lines to skip
@@ -307,7 +308,7 @@ macro_rules! load_text_lossy {
         //Loop through the rest of the file until we either reach the end or the maximum number of lines that we want.
         while reader.read_line(&mut line).unwrap() > 0{
             fln += 1;
-            if !line.starts_with(&comment){
+            if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                 //I really don't like that I have to clone this...
                 //It also forces the issue of having to potentially reallocate a string each time.
                 //If it wasn't for the line split issue down below this probably wouldn't be an issue at all.
@@ -466,7 +467,7 @@ macro_rules! load_text_other {
                 fln += 1;
                 //Checking to see if the line is a comment or not
                 //if it is increment our counter
-                if !line.starts_with(&comment){
+                if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                     n_line_skip += 1; 
                 }
                 //If we've reached the number of lines to skip
@@ -483,7 +484,7 @@ macro_rules! load_text_other {
         //Loop through the rest of the file until we either reach the end or the maximum number of lines that we want.
         while reader.read_line(&mut line).unwrap() > 0{
             fln += 1;
-            if !line.starts_with(&comment){
+            if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
                 //I really don't like that I have to clone this...
                 //It also forces the issue of having to potentially reallocate a string each time.
                 //If it wasn't for the line split issue down below this probably wouldn't be an issue at all.
