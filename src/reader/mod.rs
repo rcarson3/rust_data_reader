@@ -20,6 +20,7 @@ use std::fs::File;
 use std::io::{Read, BufReader, BufRead, SeekFrom};
 use bytecount;
 use lexical;
+use memchr::memchr2_iter;
 
 use failure::Error;
 // use failure::err_msg;
@@ -40,12 +41,15 @@ pub use self::uint_reader::*;
 pub use self::float_reader::*;
 pub use self::prim_reader::*;
 
-const BUF_SIZE: usize = 8 * (1<<10);
+//This value is similar in value to the one found in BurntSushi's CSV buffer size
+//Our's is just 4x as large.
+const BUF_SIZE: usize = 8 * (1<<12);
 ///The type of delimiter that we can use
 pub enum Delimiter{
     WhiteSpace,
     Any(u8),
 }
+
 
 ///ReaderParams tells us what our reader should be doing.
 ///
@@ -115,50 +119,72 @@ pub fn read_num_file_tot_lines(f: &mut File) -> usize{
     count
 }
 
-///It simply reads all of the lines in the file when an end of line is denoted by \n. 
-///A comment character is provided and if it is seen then it is not counted in the total.
-///
-/// Note it is assummed that the comment character only appears at the beginning of a line and nowhere else.
-///If it does appear in more then one location this will currently provide the incorrect number of lines per
-///the file. A more careful solution could be introduced which does not take advantage of this quick method.
-// pub fn read_num_file_lines(f: &mut File, com: u8) -> usize{
-//     let mut buffer = vec![0u8; BUF_SIZE];
-//     let mut count = 0;
 
-//     loop{
-//         let length = f.read(buffer.as_mut_slice()).unwrap();
-//         count += count_lines(&buffer[0..length], b'\n');
-//         count -= count_lines(&buffer[0..length], com);
-//         if length < BUF_SIZE{
-//             break;
-//         }
-//     }
-
-//     count
-// }
-
+///It simply reads all of the lines in the file when an end of line is denoted by \n or \r. 
+///A comment character is provided and if it is seen then before any nonwhite space the line is not counted in the total. 
 pub fn read_num_file_lines(f: &File, com: u8) -> usize{
-    
-    let tmp = [com.clone()];
-    let comment = str::from_utf8(&tmp).unwrap();
     let mut count = 0;
-
-    //We are now creating a reader buffer to easily read through our file
-    let mut reader = BufReader::new(f);
-    //An allocated string to read in the buffer file.
-    let mut line = String::new();
-
-    //Very way to count the total number of useable lines.
-    while reader.read_line(&mut line).unwrap() > 0{
-        //Here we're checking to see if we've run across a blank line or
-        //a commented line.
-        if (!line.trim_left().starts_with(&comment)) && (!line.trim_left().is_empty()){
-            count += 1;
+    //We're explicitly using the raw bytes here
+    let mut reader = BufReader::with_capacity(BUF_SIZE, f);
+    //We loop over until the file has been completely read
+    loop{
+        //We first find the length of our buffer
+        let length = {
+            //We fill the buffer up. Our buffer is mutable which is why it's in this block
+            let buffer = reader.fill_buf().unwrap();
+            //We're now going to use an explicit loop.
+            //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
+            //to a location of my choosing.
+            let mut i = 0;
+            //We're using the memchr crate to locate all of the most common newline characters
+            //It provides a nice iterator over our buffer that we can now use.
+            let mut newline = memchr2_iter(b'\n', b'\r', buffer);
+            //We don't want our loop index to go past our buffer length or else bad things could occur
+            let length = buffer.len();
+            //Keeping it old school with some nice wild loops
+            while i < length{
+                //Here's where the main magic occurs
+                //If we come across a space or tab we move to the next item in the buffer
+                //If we come across a newline character we advance our iterator and move onto the
+                //next index essentially
+                //If we come across a comment character first (white spaces aren't counted) we completely skip the line
+                //If we come across any other character first (white spaces aren't counted) we increment our line counter
+                //and then skip the rest of the contents of the line.
+                //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
+                //we can exit the loop.
+                if (buffer[i] == b' ') | (buffer[i] == b'\t')  {
+                    i += 1;
+                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
+                    let val = newline.next();
+                    i = match val {
+                        Some(val) => val + 1,
+                        None => length,
+                    };
+                }else if buffer[i] == com {
+                    let val = newline.next();
+                    i = match val {
+                        Some(val) => val + 1,
+                        None => length,
+                    };
+                } else{
+                    count += 1;
+                    let val = newline.next();
+                    i = match val {
+                        Some(val) => val + 1,
+                        None => length,
+                    };
+                }
+            }
+            //Pass off our length to set our length outside of this block of code
+            length
+        };
+        //We now need to consume everything in our buffer, so it's marked off as no longer being needed
+        reader.consume(length);
+        //If our length is less than our fixed buffer size we've reached the end of our file and can now exit. 
+        if length < BUF_SIZE{
+            break;
         }
-        //clear our buffer
-        line.clear();
     }
-
+    //Finally, we return our line count to the main code.
     count
-
 }
