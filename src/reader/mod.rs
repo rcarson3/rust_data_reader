@@ -17,7 +17,7 @@ use std::vec::*;
 use std::str;
 use std::str::{FromStr};
 use std::fs::File;
-use std::io::{Read, BufReader, BufRead, SeekFrom};
+use std::io::{Read, BufReader, BufRead, SeekFrom, Seek};
 use bytecount;
 use lexical;
 use memchr::memchr2_iter;
