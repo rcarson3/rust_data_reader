@@ -13,7 +13,6 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 use super::*;
-use std::io::{BufRead, Seek};
 
 ///load_txt_f32 reads in a data file that is made up of f32 type data. If this assumption is not made then the parser will fail
 ///during the conversion between strings to f32. It can also fail in a number of other ways related to invalid parameters or the
