@@ -20,57 +20,55 @@ use std::io::{BufRead, Seek};
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
-/// f is simply the location of the file. 
+///
+///Input -
+///
+/// f is simply the location of the file.
 ///        
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, Error> {
     load_text!(f, params, u8)
 }
-
 
 ///load_txt_u16 reads in a data file that is made up of u16 type data. If this assumption is not made then the parser will fail
 ///during the conversion between strings to u16. It can also fail in a number of other ways related to invalid parameters or the
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
+///
+///Input -
+///
 /// f is simply the location of the file.
 ///        
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>, Error> {
     load_text!(f, params, u16)
 }
-
 
 ///load_txt_u32 reads in a data file that is made up of u32 type data. If this assumption is not made then the parser will fail
 ///during the conversion between strings to u32. It can also fail in a number of other ways related to invalid parameters or the
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
-/// f is simply the location of the file. 
+///
+///Input -
+///
+/// f is simply the location of the file.
 ///        
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>, Error> {
     load_text!(f, params, u32)
 }
 
@@ -79,17 +77,17 @@ pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
+///
+///Input -
+///
 /// f is simply the location of the file.
 ///        
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>, Error> {
     load_text!(f, params, u64)
 }
 
@@ -98,17 +96,17 @@ pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
+///
+///Input -
+///
 /// f is simply the location of the file.
 ///        
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u128>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u128>, Error> {
     load_text!(f, params, u128)
 }
 
@@ -117,17 +115,17 @@ pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u12
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
 ///does contain information about what line number of the data file has the malformed field.
-/// 
-///Input - 
-/// 
+///
+///Input -
+///
 /// f is simply the location of the file.
 ///        
-/// 
+///
 /// params is ReaderParams structure. An example for what this looks like can be found in the test directory.
-/// 
-///Output - 
-/// 
-/// A Result type that either contains a ReaderResults structure or an error. 
-pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<ReaderResults<usize>, Error>{
+///
+///Output -
+///
+/// A Result type that either contains a ReaderResults structure or an error.
+pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<ReaderResults<usize>, Error> {
     load_text!(f, params, usize)
 }
