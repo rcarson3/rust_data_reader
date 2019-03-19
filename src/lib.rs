@@ -20,7 +20,7 @@
 //!1.  New line and commented lines are not counted in the lines that you want skipped or that have been read.
 //!2.  If the code fails to convert from a string to the supported type it will fail.
 //!3.  Whitespaces are stripped from the front and end of whatever string is between delimeters.
-//!4.  All of the data being read in needs to be the same type. 
+//!4.  All of the data being read in needs to be the same type.
 //!
 //!It provides support for the following types:
 //!
@@ -31,14 +31,14 @@
 //!char bool String
 //!```
 //!
-//!The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, you should expect roughly a 88MB/s for the read in. 
+//!The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, you should expect roughly a 88MB/s for the read in.
 //!
 //!If your data file doesn't meet these types you might want to look into BurntSushi's CSV crate for your needs.
 //!
 //!# Roadmap
 //!Update the backend such that it makes it possible to have multiple data types in the file being read.
 //!
-//!Update the backend to provide better performance. 
+//!Update the backend to provide better performance.
 //!
 //!New backend should look closer to what's currently being done in BurntSushi's CSV crate.
 //!
@@ -82,4 +82,4 @@ extern crate lexical;
 extern crate memchr;
 
 ///Contains all of the functions related to the different readers that will be generated.
-pub mod reader; 
+pub mod reader;
