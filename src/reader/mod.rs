@@ -17,7 +17,7 @@ use bytecount;
 use lexical;
 use memchr::memchr2_iter;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read, Seek, SeekFrom};
+use std::io::{BufRead, BufReader, Read, SeekFrom};
 use std::str;
 use std::str::FromStr;
 use std::vec::*;
@@ -31,6 +31,7 @@ pub mod macro_src;
 
 pub mod float_reader;
 pub mod int_reader;
+pub mod parser;
 pub mod prim_reader;
 pub mod uint_reader;
 
@@ -38,6 +39,7 @@ pub use self::float_reader::*;
 pub use self::int_reader::*;
 #[doc(hidden)]
 pub use self::macro_src::*;
+pub use self::parser::parse_txt;
 pub use self::prim_reader::*;
 pub use self::uint_reader::*;
 
