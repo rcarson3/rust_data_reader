@@ -1,4 +1,4 @@
-// This file is a part of the mori - Material Orientation Library in Rust
+// This file is a part of the Rust Data Reader Library
 // Copyright 2018 Robert Carson
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,6 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 use super::*;
-use std::io::{BufRead, Seek};
 
 ///load_txt_string reads in a data file that is made up of string type data. If this assumption is not made then the parser will fail
 ///during the conversion between strings to string. It can also fail in a number of other ways related to invalid parameters or the

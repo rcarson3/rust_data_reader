@@ -1,4 +1,4 @@
-// This file is a part of the mori - Material Orientation Library in Rust
+// This file is a part of the Rust Data Reader Library
 // Copyright 2018 Robert Carson
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,10 +51,6 @@ pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>
 
 pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error> {
     load_text!(f, params, f64)
-}
-
-pub fn load_txt_old_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error> {
-    load_text_old!(f, params, f64)
 }
 
 ///load_txt_lossy_f32 reads in a data file that is made up of f32 type data. If this assumption is not made then the parser will fail

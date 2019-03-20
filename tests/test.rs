@@ -334,38 +334,6 @@ fn load_txt_f32_test() {
     );
 }
 
-#[test]
-fn load_txt_f64_trial_test() {
-    let file = String::from("float_testv1.txt");
-
-    let params = ReaderParams {
-        comments: b'%',
-        delimiter: Delimiter::WhiteSpace,
-        skip_header: None,
-        skip_footer: None,
-        usecols: None,
-        max_rows: None,
-    };
-
-    let results = load_txt_old_f64(&file, &params);
-
-    match &results {
-        Ok(results) => println!(
-            "Number of lines {}\nNumber of fields {}\nResults {:?}",
-            results.num_lines, results.num_fields, results.results
-        ),
-        Err(err) => println!("Error {:?}", err),
-    }
-
-    assert_eq!(
-        results.unwrap().results,
-        vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
-            17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0
-        ]
-    );
-}
-
 //The test file is in scientific notation to test functions ability to parse floating point numbers
 #[test]
 fn load_txt_f32_sci_test() {
@@ -415,10 +383,12 @@ fn load_txt_f64_sci_test() {
                            5.252514306249998766e-02, -3.486972928750000089e-01, -2.022221066250000088e-01,
                            3.201516763750000133e-02, -3.624113797500000400e-01, -2.229083163749999985e-01];
 
-    let comp: Vec<f64> = results.unwrap().results.iter().rev().take(9).map(|&x| x).collect();
+    let comp = &results.unwrap().results;
+    let len = comp.len();
+    let slice = &comp[(len - 9) .. len];
 
     assert_eq!(
-        comp, end_results
+        slice, &end_results[..]
     );
 }
 
