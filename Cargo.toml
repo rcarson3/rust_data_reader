@@ -1,6 +1,6 @@
 [package]
 name = "data_reader"
-version = "0.1.3"
+version = "0.2.0"
 authors = ["rcarson3 <rac428@cornell.edu>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
@@ -8,7 +8,7 @@ publish = false
 
 repository = "https://github.com/rcarson3/rust_data_reader/"
 
-description = "An attempt to create a data loading library for data scientist. "
+description = "A data loading library for data scientist."
 
 keywords = ["data-reader"]
 categories = ["data-structures", "science"]

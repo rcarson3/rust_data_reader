@@ -31,7 +31,7 @@ fn load_txt_f64_large_test() {
 }
 
 //The test file is in scientific notation to test functions ability to parse floating point numbers
-fn load_txt_f64_large_test() {
+fn load_txt_lossy_f64_large_test() {
     let file = String::from("grainData_LOFEM.rods");
 
     //let cols: Vec<usize> = vec![0, 2];
