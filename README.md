@@ -1,6 +1,6 @@
 # Rust Data Reader
 
-So far this code provides similar capabilities as Numpy's loadtxt to Rust. It is currently intended to read in data that you know how it's been generated. The default delimiter is any whitespace character. The following caviates currently exist:
+So far this code provides similar capabilities as Numpy's loadtxt to Rust. You can read up on the documentation at [doc.rs](https://docs.rs/data_reader/0.2.0/data_reader/). It is currently intended to read in data that you know how it's been generated. The default delimiter is any whitespace character. The following caviates currently exist:
 
 1.  New line and commented lines are not counted in the lines that you want skipped or that have been read.
 2.  If the code fails to convert from a string to the supported type it will fail.
