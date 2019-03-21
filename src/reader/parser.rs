@@ -316,11 +316,10 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 ParseState::Space
                             }
                             ParseState::SkField => {
-                                ParseState::Space
+                                ParseState::SkField
                             }
                             ParseState::Field => {
-                                results.index.push(results.results.len());
-                                ParseState::Space
+                                ParseState::Field
                             }
                             ParseState::Space => {
                                 ParseState::Space

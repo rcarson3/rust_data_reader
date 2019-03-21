@@ -30,7 +30,7 @@ use super::*;
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<ReaderResults<i8>, Error> {
-    load_text!(f, params, i8)
+    load_text_lexical!(f, params, i8)
 }
 
 ///load_txt_i16 reads in a data file that is made up of i16 type data. If this assumption is not made then the parser will fail
@@ -49,7 +49,7 @@ pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<ReaderResults<i8>, 
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_i16(f: &str, params: &ReaderParams) -> Result<ReaderResults<i16>, Error> {
-    load_text!(f, params, i16)
+    load_text_lexical!(f, params, i16)
 }
 
 ///load_txt_i32 reads in a data file that is made up of i32 type data. If this assumption is not made then the parser will fail
@@ -68,7 +68,7 @@ pub fn load_txt_i16(f: &str, params: &ReaderParams) -> Result<ReaderResults<i16>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>, Error> {
-    load_text!(f, params, i32)
+    load_text_lexical!(f, params, i32)
 }
 
 ///load_txt_i64 reads in a data file that is made up of i64 type data. If this assumption is not made then the parser will fail
@@ -87,7 +87,7 @@ pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_i64(f: &str, params: &ReaderParams) -> Result<ReaderResults<i64>, Error> {
-    load_text!(f, params, i64)
+    load_text_lexical!(f, params, i64)
 }
 
 ///load_txt_i128 reads in a data file that is made up of i128 type data. If this assumption is not made then the parser will fail
@@ -106,5 +106,5 @@ pub fn load_txt_i64(f: &str, params: &ReaderParams) -> Result<ReaderResults<i64>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_i128(f: &str, params: &ReaderParams) -> Result<ReaderResults<i128>, Error> {
-    load_text!(f, params, i128)
+    load_text_lexical!(f, params, i128)
 }

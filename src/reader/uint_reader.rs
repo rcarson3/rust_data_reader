@@ -30,7 +30,7 @@ use super::*;
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, Error> {
-    load_text!(f, params, u8)
+    load_text_lexical!(f, params, u8)
 }
 
 ///load_txt_u16 reads in a data file that is made up of u16 type data. If this assumption is not made then the parser will fail
@@ -49,7 +49,7 @@ pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, 
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>, Error> {
-    load_text!(f, params, u16)
+    load_text_lexical!(f, params, u16)
 }
 
 ///load_txt_u32 reads in a data file that is made up of u32 type data. If this assumption is not made then the parser will fail
@@ -68,7 +68,7 @@ pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>, Error> {
-    load_text!(f, params, u32)
+    load_text_lexical!(f, params, u32)
 }
 
 ///load_txt_u64 reads in a data file that is made up of u64 type data. If this assumption is not made then the parser will fail
@@ -87,7 +87,7 @@ pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>, Error> {
-    load_text!(f, params, u64)
+    load_text_lexical!(f, params, u64)
 }
 
 ///load_txt_u128 reads in a data file that is made up of u128 type data. If this assumption is not made then the parser will fail
@@ -106,7 +106,7 @@ pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u128>, Error> {
-    load_text!(f, params, u128)
+    load_text_lexical!(f, params, u128)
 }
 
 ///load_txt_usize reads in a data file that is made up of usize type data. If this assumption is not made then the parser will fail
@@ -126,5 +126,5 @@ pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u12
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<ReaderResults<usize>, Error> {
-    load_text!(f, params, usize)
+    load_text_lexical!(f, params, usize)
 }

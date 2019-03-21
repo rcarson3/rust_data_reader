@@ -4,7 +4,8 @@ version = "0.2.0"
 authors = ["rcarson3 <rac428@cornell.edu>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
-publish = false
+edition = "2018"
+publish = true
 
 repository = "https://github.com/rcarson3/rust_data_reader/"
 

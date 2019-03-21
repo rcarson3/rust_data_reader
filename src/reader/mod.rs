@@ -27,7 +27,7 @@ use failure::Error;
 
 #[macro_use]
 #[doc(hidden)]
-pub mod macro_src;
+mod macro_src;
 
 pub mod float_reader;
 pub mod int_reader;
@@ -37,7 +37,6 @@ pub mod uint_reader;
 
 pub use self::float_reader::*;
 pub use self::int_reader::*;
-#[doc(hidden)]
 pub use self::macro_src::*;
 pub use self::parser::parse_txt;
 pub use self::prim_reader::*;
