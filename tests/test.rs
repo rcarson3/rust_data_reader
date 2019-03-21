@@ -1,10 +1,16 @@
+#[macro_use]
 extern crate data_reader;
 extern crate lexical;
+extern crate failure;
 use data_reader::reader::*;
+use failure::Error;
 
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::SeekFrom;
+use std::str;
+use std::str::FromStr;
+use std::vec::*;
 
 #[test]
 fn read_num_file_line_test() {
@@ -170,6 +176,30 @@ fn load_txt_i32_test2() {
     let params = ReaderParams {
         comments: b'%',
         delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i32(&file, &params);
+
+    assert_eq!(
+        results.unwrap().results,
+        vec![1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 19, 20, 21, 25, 26, 27, 28, 29, 30]
+    );
+}
+
+//This file for this test has 3 commented lines in it and uses "," for the delimiter.
+//So, it also tests the delimiter cases as well.
+//It should return the same results as load_txt_i32_test2()
+#[test]
+fn load_txt_i32_test3() {
+    let file = String::from("int_testv4.txt");
+
+    let params = ReaderParams {
+        comments: b'%',
+        delimiter: Delimiter::Any(b','),
         skip_header: None,
         skip_footer: None,
         usecols: None,
@@ -462,4 +492,55 @@ fn load_txt_char_test() {
     ];
 
     assert_eq!(results.unwrap().results, c_vec);
+}
+
+//Everything needed for our custom type
+#[derive(Debug, PartialEq, Clone)]
+struct MinInt{
+    x: i32,
+}
+//A simple example of implementing the FromStr trait for our custom type
+impl FromStr for MinInt{
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<MinInt, failure::Error> {
+        let temp = -1 * i32::from_str(s)?;
+        Ok(MinInt{x: temp})
+    }
+}
+
+//The test file for this has 0 commented lines in it but using a custom type
+#[test]
+fn load_txt_custom_test() -> Result<(), failure::Error> {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: b'%',
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let ref_file = &file;
+    let ref_params = &params;
+
+
+    let results: Result<ReaderResults<MinInt>, Error> = load_text!(ref_file, ref_params, MinInt);
+
+    let temp = results.unwrap().results.clone();
+
+    let vals: Vec<i32> = temp.iter().map(|x| x.x).collect();
+
+    assert_eq!(
+        vals,
+        vec![
+            -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14,
+            -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25, -26, -27,
+            -28, -29, -30
+        ]
+    );
+
+    Ok(())
 }

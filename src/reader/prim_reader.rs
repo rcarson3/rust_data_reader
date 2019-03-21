@@ -30,7 +30,7 @@ use super::*;
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_string(f: &str, params: &ReaderParams) -> Result<ReaderResults<String>, Error> {
-    load_text_other!(f, params, String)
+    load_text!(f, params, String)
 }
 
 ///load_txt_bool reads in a data file that is made up of bool type data. If this assumption is not made then the parser will fail
@@ -51,7 +51,7 @@ pub fn load_txt_string(f: &str, params: &ReaderParams) -> Result<ReaderResults<S
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_bool(f: &str, params: &ReaderParams) -> Result<ReaderResults<bool>, Error> {
-    load_text_other!(f, params, bool)
+    load_text!(f, params, bool)
 }
 
 ///load_txt_char reads in a data file that is made up of char type data. If this assumption is not made then the parser will fail
@@ -72,5 +72,5 @@ pub fn load_txt_bool(f: &str, params: &ReaderParams) -> Result<ReaderResults<boo
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_char(f: &str, params: &ReaderParams) -> Result<ReaderResults<char>, Error> {
-    load_text_other!(f, params, char)
+    load_text!(f, params, char)
 }

@@ -23,7 +23,7 @@
 ///        type - the data type we'll be using
 ///Output - A Result type that either contains a ReaderResults structure or an error.
 #[doc(hidden)]
-macro_rules! load_text {
+macro_rules! load_text_lexical {
     ($f:expr, $params:expr, $type: ident) => {{
         //Get the raw results
         let raw_results = parse_txt($f, $params)?;
@@ -110,7 +110,7 @@ macro_rules! load_text_lossy {
         Ok(results)
     }};
 }
-///load_txt_other! reads in a data file that is made up of any type data that supports FromStr trait. If this assumption is not made then the parser will fail
+///load_txt! reads in a data file that is made up of any type data that supports FromStr trait. If this assumption is not made then the parser will fail
 ///during the conversion between &[u8] to the type. It can also fail in a number of other ways related to invalid parameters or the
 ///data file having malformed fields. These errors are percolated up to whatever is calling this in the form of the Error type.
 ///One should therefore check to make sure no errors are obtained when examining the file. If a malformed field is seen the error
@@ -119,8 +119,8 @@ macro_rules! load_text_lossy {
 ///        params is ReaderParams structure. An example for what this looks like can be found in the test directory.
 ///        type - the data type we'll be using
 ///Output - A Result type that either contains a ReaderResults structure or an error.
-#[doc(hidden)]
-macro_rules! load_text_other {
+#[macro_export]
+macro_rules! load_text {
     ($f:expr, $params:expr, $type: ident) => {
         {
         //Get the raw results
