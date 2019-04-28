@@ -65,7 +65,7 @@ pub enum Delimiter {
 ///
 /// max_rows - an optional field that tells us the maximum number of rows we should use from the file
 pub struct ReaderParams {
-    pub comments: u8,
+    pub comments: Option<u8>,
     pub delimiter: Delimiter,
     pub skip_header: Option<usize>,
     pub skip_footer: Option<usize>,
@@ -76,7 +76,7 @@ pub struct ReaderParams {
 impl Default for ReaderParams {
     fn default() -> ReaderParams {
         ReaderParams {
-            comments: b'#',
+            comments: Some(b'#'),
             delimiter: Delimiter::WhiteSpace,
             skip_header: None,
             skip_footer: None,
