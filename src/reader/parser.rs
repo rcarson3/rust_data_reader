@@ -47,8 +47,18 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
     };
     let mut file = File::open(f)?;
 
+    //our comment string
+    //If we don't have one then we just say a comment is a newline character.
+    //The newline check comes first in all of these so it'll be as if the parser never
+    //has to worry about the comments.
+    let cmt = if let Some(x) = params.comments{
+        x
+    }else{
+        b'\n'
+    };
+
     //We are finding how many lines in our data file are actually readable and are not commented lines.
-    let num_lines = read_num_file_lines(&mut file, params.comments);
+    let num_lines = read_num_file_lines(&mut file, cmt);
     //We need to rewind our file back to the start.
     file.seek(SeekFrom::Start(0))?;
 
@@ -117,8 +127,6 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         None => (num_lines - sk_h - sk_f)
     };
 
-    //our comment string
-    let cmt = params.comments.clone();
     //We're simply stating whether we're using whitespaces or not for our delimiter.
     let delim_ws = match &params.delimiter{
             Delimiter::WhiteSpace => {
@@ -225,6 +233,9 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
 
     //We need to count our field variables and set this variable initially outside the main loop.
     let mut field_counter  = 0;
+
+    //Fix me: count the number of fields first before the below loop. Next see if the values entered for the column values are
+    //valid. If they aren't then we need to exit.
 
     //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're essentially running a poorly optimized
     //state machine. However, it turns out that this works decent enough for our purposes as long as the optimizer is used.

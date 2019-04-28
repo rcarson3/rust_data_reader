@@ -45,7 +45,7 @@ fn load_txt_i32_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -69,7 +69,7 @@ fn load_txt_i32_test_sk_f() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: Some(5),
@@ -90,7 +90,7 @@ fn load_txt_i32_test_sk_h() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: Some(3),
         skip_footer: None,
@@ -111,7 +111,7 @@ fn load_txt_i32_test_mrows() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -132,7 +132,7 @@ fn load_txt_i32_test_sk_f_big() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: Some(3),
         skip_footer: Some(11),
@@ -152,7 +152,7 @@ fn load_txt_i32_test_u_cols() {
     let cols: Vec<usize> = vec![3];
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -174,7 +174,7 @@ fn load_txt_i32_test2() {
     let file = String::from("int_testv3.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -198,7 +198,7 @@ fn load_txt_i32_test3() {
     let file = String::from("int_testv4.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::Any(b','),
         skip_header: None,
         skip_footer: None,
@@ -220,7 +220,7 @@ fn load_txt_i8_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -245,7 +245,7 @@ fn load_txt_i16_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -270,7 +270,7 @@ fn load_txt_i64_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -295,7 +295,7 @@ fn load_txt_u8_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -320,7 +320,32 @@ fn load_txt_usize_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_usize(&file, &params);
+
+    assert_eq!(
+        results.unwrap().results,
+        vec![
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+            25, 26, 27, 28, 29, 30
+        ]
+    );
+}
+
+//The test file for this has 0 commented lines in it
+#[test]
+fn load_txt_usize_no_cmt_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: None,
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -345,7 +370,7 @@ fn load_txt_f32_test() {
     let file = String::from("float_testv1.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -371,7 +396,7 @@ fn load_txt_f32_sci_test() {
     let file_ref = &file;
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -392,12 +417,13 @@ fn load_txt_f32_sci_test() {
     );
 }
 #[test]
+#[ignore]
 fn load_txt_f64_sci_test() {
     let file = String::from("grainData_LOFEM.rods");
     let file_ref = &file;
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -428,7 +454,7 @@ fn load_txt_string_test() {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -453,7 +479,7 @@ fn load_txt_bool_test() {
     let file = String::from("bool_test.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -476,7 +502,7 @@ fn load_txt_char_test() {
     let file = String::from("char_test.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -515,7 +541,7 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,

@@ -34,7 +34,7 @@ macro_rules! load_text_lexical {
         let mut results = ReaderResults {
             num_fields: 0,
             num_lines: 0,
-            results: Vec::<$type>::with_capacity(num_items),
+            results: Vec::<$type>::with_capacity(num_items + 1),
         };
 
         results.num_fields = raw_results.num_fields;
@@ -84,7 +84,7 @@ macro_rules! load_text_lossy {
         let mut results = ReaderResults {
             num_fields: 0,
             num_lines: 0,
-            results: Vec::<$type>::with_capacity(num_items),
+            results: Vec::<$type>::with_capacity(num_items + 1),
         };
 
         results.num_fields = raw_results.num_fields;
@@ -132,7 +132,7 @@ macro_rules! load_text {
         let mut results = ReaderResults {
             num_fields: 0,
             num_lines: 0,
-            results: Vec::<$type>::with_capacity(num_items),
+            results: Vec::<$type>::with_capacity(num_items + 1),
         };
 
         results.num_fields = raw_results.num_fields;
