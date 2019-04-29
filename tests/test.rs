@@ -65,16 +65,59 @@ fn load_txt_i32_test() {
 }
 
 #[test]
+fn load_txt_i32_reader_params_constructor_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams{
+            comments: Some(b'%'),
+            ..Default::default()
+    };
+
+    let results = load_txt_i32(&file, &params);
+
+    assert_eq!(
+        results.unwrap().results,
+        vec![
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+            25, 26, 27, 28, 29, 30
+        ]
+    );
+}
+
+#[test]
+fn load_txt_i32_reader_params_default_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams::default();
+
+    let results = load_txt_i32(&file, &params);
+
+    assert_eq!(
+        results.unwrap().results,
+        vec![
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+            25, 26, 27, 28, 29, 30
+        ]
+    );
+}
+
+#[test]
 fn load_txt_i32_test_sk_f() {
     let file = String::from("int_testv2.txt");
 
-    let params = ReaderParams {
+    // let params = ReaderParams {
+    //     comments: Some(b'%'),
+    //     delimiter: Delimiter::WhiteSpace,
+    //     skip_header: None,
+    //     skip_footer: Some(5),
+    //     usecols: None,
+    //     max_rows: None,
+    // };
+
+    let params = ReaderParams{
         comments: Some(b'%'),
-        delimiter: Delimiter::WhiteSpace,
-        skip_header: None,
         skip_footer: Some(5),
-        usecols: None,
-        max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
