@@ -226,17 +226,23 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
 
     let mut state = ParseState::NwLine;
     //Next we need to get a list of our columns we might be using. If we aren't we supply an empty vector, so we can easily check if the len is 0.
+    //We also do a simple check to see if any of the supplied values are equal to 0. If they are we exit early with an error.
     let cols = match &params.usecols{
-        Some(x) => {x.clone()}
+        Some(x) => {
+            let x = if x.iter().any(|&x| x == 0) {
+                return Err(format_err!("Input for usecols contains a value equal to 0. Values should be greater than 0"));
+            }else{
+                x.clone()
+            };
+            x
+        }
         None => {Vec::<usize>::new()}
     };
 
     //We need to count our field variables and set this variable initially outside the main loop.
     let mut field_counter  = 0;
-
-    //Fix me: count the number of fields first before the below loop. Next see if the values entered for the column values are
-    //valid. If they aren't then we need to exit.
-
+    //We'll need to now the total number of fields later on and set this variable initially outside the main loop.
+    let mut tot_fields = 0;
     //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're essentially running a poorly optimized
     //state machine. However, it turns out that this works decent enough for our purposes as long as the optimizer is used.
     loop{
@@ -353,11 +359,20 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                             if delim_ws {
                                 field_counter = field_counter - 1;
                                 if results.num_lines == 0 {
-                                    results.num_fields = field_counter;
+                                    tot_fields = field_counter;
+                                    results.num_fields = if cols.len() > 0 {
+                                        if cols.iter().any(|&x| x > field_counter){
+                                            return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        }else{
+                                            cols.len()
+                                        }
+                                    }else{
+                                        field_counter
+                                    };
                                 }
-                                if (field_counter != results.num_fields) & (field_counter != 0) {
+                                if (field_counter != tot_fields) & (field_counter != 0) {
                                     return Err(format_err!("Newline (delim) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                    is different than the initial field number of {}", field_counter, fln, tot_fields));
                                 }
                                 field_counter = 0;
                                 results.num_lines += 1;
@@ -369,11 +384,20 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         }
                         ParseState::SkField => {
                             if results.num_lines == 0 {
-                                results.num_fields = field_counter;
+                                tot_fields = field_counter;
+                                results.num_fields = if cols.len() > 0 {
+                                    if cols.iter().any(|&x| x > field_counter){
+                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                    }else{
+                                        cols.len()
+                                    }
+                                }else{
+                                    field_counter
+                                };
                             }
-                            if field_counter != results.num_fields {
+                            if field_counter != tot_fields {
                                 return Err(format_err!("Newline (skip field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                is different than the initial field number of {}", field_counter, fln, tot_fields));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
@@ -382,11 +406,20 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         ParseState::Field => {
                             results.index.push(results.results.len());
                             if results.num_lines == 0 {
-                                results.num_fields = field_counter;
+                                tot_fields = field_counter;
+                                results.num_fields = if cols.len() > 0 {
+                                    if cols.iter().any(|&x| x > field_counter){
+                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                    }else{
+                                        cols.len()
+                                    }
+                                }else{
+                                    field_counter
+                                };
                             }
-                            if field_counter != results.num_fields {
+                            if field_counter != tot_fields {
                                 return Err(format_err!("Newline (field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                is different than the initial field number of {}", field_counter, fln, tot_fields));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
@@ -411,11 +444,20 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                             if delim_ws {
                                 field_counter = field_counter - 1;
                                 if (results.num_lines == 0) & (field_counter != 0){
-                                    results.num_fields = field_counter;
+                                    tot_fields = field_counter;
+                                    results.num_fields = if cols.len() > 0 {
+                                        if cols.iter().any(|&x| x > field_counter){
+                                            return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        }else{
+                                            cols.len()
+                                        }
+                                    }else{
+                                        field_counter
+                                    };
                                 }
-                                if (field_counter != results.num_fields) & (field_counter != 0) {
+                                if (field_counter != tot_fields) & (field_counter != 0) {
                                     return Err(format_err!("Cmt (delim) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                    is different than the initial field number of {}", field_counter, fln, tot_fields));
                                 }
                                 if field_counter > 0{
                                     field_counter = 0;
@@ -430,11 +472,20 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         }
                         ParseState::SkField => {
                             if results.num_lines == 0 {
-                                results.num_fields = field_counter;
+                                tot_fields = field_counter;
+                                results.num_fields = if cols.len() > 0 {
+                                    if cols.iter().any(|&x| x > field_counter){
+                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                    }else{
+                                        cols.len()
+                                    }
+                                }else{
+                                    field_counter
+                                };
                             }
-                            if field_counter != results.num_fields {
+                            if field_counter != tot_fields {
                                 return Err(format_err!("Cmt (skip field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                is different than the initial field number of {}", field_counter, fln, tot_fields));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
@@ -442,12 +493,21 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         }
                         ParseState::Field => {
                             if results.num_lines == 0 {
-                                results.num_fields = field_counter;
+                                tot_fields = field_counter;
+                                results.num_fields = if cols.len() > 0 {
+                                    if cols.iter().any(|&x| x > field_counter){
+                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                    }else{
+                                        cols.len()
+                                    }
+                                }else{
+                                    field_counter
+                                };
                             }
                             results.index.push(results.results.len());
-                            if field_counter != results.num_fields {
+                            if field_counter != tot_fields {
                                 return Err(format_err!("Cmt (field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, results.num_fields));
+                                is different than the initial field number of {}", field_counter, fln, tot_fields));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
