@@ -62,6 +62,7 @@ pub enum Delimiter {
 ///     comment lines from the end of the file
 ///
 /// usecols - an optional field that tells us what column numbers we should be using from the data field
+///     where these values should be >= 1. We don't use 0 indexing for these values.
 ///
 /// max_rows - an optional field that tells us the maximum number of rows we should use from the file
 pub struct ReaderParams {

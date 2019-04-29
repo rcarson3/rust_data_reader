@@ -162,6 +162,68 @@ fn load_txt_i32_test_u_cols() {
 
     let results = load_txt_i32(&file, &params);
 
+    let results = results.unwrap();
+
+    assert_eq!(
+        results.results,
+        vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
+    );
+
+    assert_eq!(
+        results.num_fields,
+        1
+    );
+
+    assert_eq!(
+        results.num_lines,
+        10
+    );
+
+}
+
+
+#[test]
+#[should_panic]
+fn load_txt_i32_test_u_cols_0() {
+    let file = String::from("int_testv2.txt");
+
+    let cols: Vec<usize> = vec![0];
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: Some(cols),
+        max_rows: None,
+    };
+
+    let results = load_txt_i32(&file, &params);
+
+    assert_eq!(
+        results.unwrap().results,
+        vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
+    );
+}
+
+#[test]
+#[should_panic]
+fn load_txt_i32_test_u_cols_out_bnds() {
+    let file = String::from("int_testv2.txt");
+
+    let cols: Vec<usize> = vec![6];
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: Some(cols),
+        max_rows: None,
+    };
+
+    let results = load_txt_i32(&file, &params);
+
     assert_eq!(
         results.unwrap().results,
         vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
