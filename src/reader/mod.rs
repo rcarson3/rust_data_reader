@@ -74,6 +74,15 @@ pub struct ReaderParams {
     pub max_rows: Option<usize>,
 }
 
+///You can use the default constructor like this:
+///
+///let params = ReaderParams::default(); or you could do
+///
+///something like -     
+///let params = ReaderParams{
+///        comments: Some(b'%'),
+///        ..Default::default()
+///};
 impl Default for ReaderParams {
     fn default() -> ReaderParams {
         ReaderParams {

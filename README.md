@@ -34,8 +34,16 @@ fn load_txt_i32_test_sk_f(){
     //The file here is the one included in the main folder.
     let file = String::from("int_testv2.txt");
 
+    //A default constructor could look like this:
+    //let params = ReaderParams::default();
+    //The below could also look like the following:
+    //let params = ReaderParams{
+    //     comments: Some(b'%'),
+    //     skip_footer: Some(5),
+    //     ..Default::default()
+    //};
     let params = ReaderParams{
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: Some(5),
@@ -90,7 +98,7 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
         skip_footer: None,
@@ -123,6 +131,7 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
 ```
 
 # Versions
+* 0.3.0 - A bug was noted in the use_cols field of the ReaderParams struct that allowed you to input values that weren't useable. Also, the ReaderParams comment field was updated to being an option. Additional documentation was also added to note that the use_cols field assumes values start with an index of 1.
 * 0.2.0 - A new parsing backend has been added which saw a 40% improvement parsing/reading in a large 1GB file of all f64s. Exposed the parser to the end user so the user can deal with the raw bytes if they would enjoy doing so. Any type that now supports the ```FromStr``` trait can be converted over.  
 
 * 0.1.3 - Updated the code to provide a bug fix that was within the v2.0 of the lexical crate.
