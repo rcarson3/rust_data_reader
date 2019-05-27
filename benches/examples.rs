@@ -13,7 +13,7 @@ fn load_txt_f64_large_test() {
     //let cols: Vec<usize> = vec![0, 2];
 
     let params = ReaderParams{
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,//Some(100000),//None,
         skip_footer: None,
@@ -37,7 +37,7 @@ fn load_txt_lossy_f64_large_test() {
     //let cols: Vec<usize> = vec![0, 2];
 
     let params = ReaderParams{
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,//Some(100000),//None,
         skip_footer: None,
@@ -61,7 +61,7 @@ fn parser_txt_large_test() {
     //let cols: Vec<usize> = vec![0, 2];
 
     let params = ReaderParams{
-        comments: b'%',
+        comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,//Some(100000),//None,
         skip_footer: None,

@@ -38,7 +38,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
     //field = a field we want to keep
     //sk_field = a field we want to skip
     #[derive(Debug, Clone)]
-    enum ParseState{
+    enum ParseState {
         NwLine,
         Delim,
         Space,
@@ -51,14 +51,14 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
     //If we don't have one then we just say a comment is a newline character.
     //The newline check comes first in all of these so it'll be as if the parser never
     //has to worry about the comments.
-    let cmt = if let Some(x) = params.comments{
+    let cmt = if let Some(x) = params.comments {
         x
-    }else{
+    } else {
         b'\n'
     };
 
     //We are finding how many lines in our data file are actually readable and are not commented lines.
-    let num_lines = read_num_file_lines(&mut file, cmt);
+    let num_lines = read_num_file_lines(&file, cmt);
     //We need to rewind our file back to the start.
     file.seek(SeekFrom::Start(0))?;
 
@@ -66,7 +66,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
     let mut reader = BufReader::with_capacity(BUF_SIZE, file);
 
     //We are initializing our ReaderResult structure
-    let mut results = RawReaderResults{
+    let mut results = RawReaderResults {
         num_fields: 0,
         num_lines: 0,
         results: Vec::<u8>::new(),
@@ -75,36 +75,40 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
 
     //The next portion of lines is some minor error handling to make sure our parameters we provided were valid for our data file.
     //We're checking to see if we have a valid number of skipped lines for the header.
-    match &params.skip_header{
+    match &params.skip_header {
         Some(x) => {
-            if *x >= num_lines{
-                return Err(format_err!("Input for skip_header greater than the number of readable lines in the file"));
+            if *x >= num_lines {
+                return Err(format_err!(
+                    "Input for skip_header greater than the number of readable lines in the file"
+                ));
             }
         }
         None => (),
     }
 
     //Now that we know our number is valid we are setting a variable for our skipped header lines to be equal to our skippable lines.
-    let sk_h = if let Some(x) = params.skip_header{
+    let sk_h = if let Some(x) = params.skip_header {
         x
-    }else{
+    } else {
         0
     };
 
     //We're checking to see if we have a valid number of skipped lines for the footer.
-    match &params.skip_footer{
+    match &params.skip_footer {
         Some(x) => {
             if *x >= num_lines {
-                return Err(format_err!("Input for skip_footer greater than the number of readable lines in the file"));
+                return Err(format_err!(
+                    "Input for skip_footer greater than the number of readable lines in the file"
+                ));
             }
         }
         None => (),
     }
 
     //Now that we know our number is valid we are setting a variable for our skipped footer lines to be equal to our skippable lines.
-    let sk_f = if let Some(x) = params.skip_footer{
+    let sk_f = if let Some(x) = params.skip_footer {
         x
-    }else{
+    } else {
         0
     };
     //We need to error if the number of lines we can read is equal to or less than the number of skipped header and footer lines.
@@ -112,49 +116,41 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         return Err(format_err!("Input for skip_footer and skip_header greater than or equal to the number of readable lines in the file"));
     }
     //Here we're determining the number of lines that we need to read from our file.
-    let num_lines_read = match &params.max_rows{
+    let num_lines_read = match &params.max_rows {
         //If we've set a maximum number of rows. We need to first see if that number is greater than
         //the number of readable none skipped lines.
         //If we didn't then the maximum number is set to our number of readable non skipped lines.
         Some(x) => {
-                let diff_lines = num_lines - sk_h - sk_f;
-                if diff_lines > *x {
-                    *x
-                }else{
-                    diff_lines
-                }
+            let diff_lines = num_lines - sk_h - sk_f;
+            if diff_lines > *x {
+                *x
+            } else {
+                diff_lines
             }
-        None => (num_lines - sk_h - sk_f)
+        }
+        None => (num_lines - sk_h - sk_f),
     };
 
     //We're simply stating whether we're using whitespaces or not for our delimiter.
-    let delim_ws = match &params.delimiter{
-            Delimiter::WhiteSpace => {
-                true
-            }
-            Delimiter::Any(_b) => {
-                false
-            }
+    let delim_ws = match &params.delimiter {
+        Delimiter::WhiteSpace => true,
+        Delimiter::Any(_b) => false,
     };
     //Our delimeter value. If we are delimiting using whitespace we set this as a space. However, we'll take into consideration tabs as well.
-    let delim = match &params.delimiter{
-        Delimiter::WhiteSpace => {
-            b' '
-        }
-        Delimiter::Any(b) => {
-            *b
-        }
+    let delim = match &params.delimiter {
+        Delimiter::WhiteSpace => b' ',
+        Delimiter::Any(b) => *b,
     };
 
     //File line number used for Error information
     let mut fln = 0;
     //If we skip any header lines then we need to skip forward through the file by
     //the correct number of lines when not taking into account commented lines.
-    if sk_h > 0{
+    if sk_h > 0 {
         let mut count = 0;
 
         //We loop over until we've skipped over the desired number of lines
-        loop{
+        loop {
             //We first find the length of our buffer
             let length = {
                 //We fill the buffer up. Our buffer is mutable which is why it's in this block
@@ -169,7 +165,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                 //We don't want our loop index to go past our buffer length or else bad things could occur
                 let length = buffer.len();
                 //Keeping it old school with some nice wild loops
-                while i < length{
+                while i < length {
                     //Here's where the main magic occurs
                     //If we come across a space or tab we move to the next item in the buffer
                     //If we come across a newline character we advance our iterator and move onto the
@@ -179,23 +175,16 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                     //and then skip the rest of the contents of the line.
                     //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
                     //we can exit the loop.
-                    if (buffer[i] == b' ') | (buffer[i] == b'\t')  {
+                    if (buffer[i] == b' ') | (buffer[i] == b'\t') {
                         i += 1;
-                    } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
+                    } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') | (buffer[i] == cmt) {
                         let val = newline.next();
                         i = match val {
                             Some(val) => val + 1,
                             None => length + 1,
                         };
                         fln += 1;
-                    }else if buffer[i] == cmt {
-                        let val = newline.next();
-                        i = match val {
-                            Some(val) => val + 1,
-                            None => length + 1,
-                        };
-                        fln += 1;
-                    } else{
+                    } else {
                         count += 1;
                         let val = newline.next();
                         i = match val {
@@ -205,7 +194,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         fln += 1;
                     }
                     //Here we're checking to see if we've reached the number of lines to skip or not
-                    if count == sk_h{
+                    if count == sk_h {
                         break;
                     }
                 }
@@ -215,7 +204,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
             //We now need to consume everything upto "length" in our buffer, so it's marked off as no longer being needed
             reader.consume(length);
             //If we've skipped over the desired number of lines we can exit the loop.
-            if count == sk_h{
+            if count == sk_h {
                 break;
             }
         }
@@ -227,25 +216,25 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
     let mut state = ParseState::NwLine;
     //Next we need to get a list of our columns we might be using. If we aren't we supply an empty vector, so we can easily check if the len is 0.
     //We also do a simple check to see if any of the supplied values are equal to 0. If they are we exit early with an error.
-    let cols = match &params.usecols{
+    let cols = match &params.usecols {
         Some(x) => {
             let x = if x.iter().any(|&x| x == 0) {
                 return Err(format_err!("Input for usecols contains a value equal to 0. Values should be greater than 0"));
-            }else{
+            } else {
                 x.clone()
             };
             x
         }
-        None => {Vec::<usize>::new()}
+        None => Vec::<usize>::new(),
     };
 
     //We need to count our field variables and set this variable initially outside the main loop.
-    let mut field_counter  = 0;
+    let mut field_counter = 0;
     //We'll need to now the total number of fields later on and set this variable initially outside the main loop.
     let mut tot_fields = 0;
     //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're essentially running a poorly optimized
     //state machine. However, it turns out that this works decent enough for our purposes as long as the optimizer is used.
-    loop{
+    loop {
         //We first find the length of our buffer
         let length = {
             //We fill the buffer up. Our buffer is mutable which is why it's in this block
@@ -261,14 +250,14 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
             //We don't want our loop index to go past our buffer length or else bad things could occur
             let length = buffer.len();
             //Keeping it old school with some nice wild loops
-            while i < length{
+            while i < length {
                 //Here's where the main magic occurs
                 //If we come across a delimiter and we're not using white space as our delimiter we base everything we do based on our previous state.
                 //If we come across a space or tab we move to the next item in the buffer unless we're using whitespace as delimiter in which case we do
                 //everything we were doing with the delimiter case
                 //If we come across a newline character we advance our iterator and move onto the
                 //next item in the buffer. We also check that our total number of fields are what they should be and if they aren't we error out. Other things
-                //to note are that outside of the comment and delimiter character case this is the only other place where we'll push the end index for 
+                //to note are that outside of the comment and delimiter character case this is the only other place where we'll push the end index for
                 //our raw data that we've come across.
                 //If we come across a comment character first (white spaces aren't counted) we completely skip the rest of the line.
                 //If we come across any other character first (white spaces aren't counted) then we're in a field and we check to see if its one we should skip or not.
@@ -277,14 +266,12 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                 //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
                 //we can exit the loop. However, our state is preserved between loops.
                 if (buffer[i] == delim) & !delim_ws {
-                    state = match state{
+                    state = match state {
                         ParseState::NwLine => {
                             field_counter = 1;
                             ParseState::Delim
                         }
-                        ParseState::Delim => {
-                            ParseState::Delim
-                        }
+                        ParseState::Delim => ParseState::Delim,
                         ParseState::SkField => {
                             field_counter += 1;
                             ParseState::Delim
@@ -300,16 +287,14 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         }
                     };
                     i += 1;
-                }else if (buffer[i] == b' ') | (buffer[i] == b'\t')  {
-                    if delim_ws{
-                        state = match state{
+                } else if (buffer[i] == b' ') | (buffer[i] == b'\t') {
+                    if delim_ws {
+                        state = match state {
                             ParseState::NwLine => {
                                 field_counter = 1;
                                 ParseState::Delim
                             }
-                            ParseState::Delim => {
-                                ParseState::Delim
-                            }
+                            ParseState::Delim => ParseState::Delim,
                             ParseState::SkField => {
                                 field_counter += 1;
                                 ParseState::Delim
@@ -324,80 +309,81 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 ParseState::Delim
                             }
                         };
-                    } else{
-                        state = match state{
-                            ParseState::NwLine => {
-                                ParseState::Space
-                            }
-                            ParseState::Delim => {
-                                ParseState::Space
-                            }
-                            ParseState::SkField => {
-                                ParseState::SkField
-                            }
-                            ParseState::Field => {
-                                ParseState::Field
-                            }
-                            ParseState::Space => {
-                                ParseState::Space
-                            }
+                    } else {
+                        state = match state {
+                            ParseState::NwLine => ParseState::Space,
+                            ParseState::Delim => ParseState::Space,
+                            ParseState::SkField => ParseState::SkField,
+                            ParseState::Field => ParseState::Field,
+                            ParseState::Space => ParseState::Space,
                         };
                     }
                     i += 1;
-                }else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
+                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
                     let val = newline.next();
                     i = match val {
                         Some(val) => val + 1,
                         None => length,
                     };
                     fln += 1;
-                    state = match state{
-                        ParseState::NwLine => {
-                            ParseState::NwLine
-                        }
+                    state = match state {
+                        ParseState::NwLine => ParseState::NwLine,
                         ParseState::Delim => {
                             if delim_ws {
-                                field_counter = field_counter - 1;
+                                field_counter -= 1;
                                 if results.num_lines == 0 {
                                     tot_fields = field_counter;
-                                    results.num_fields = if cols.len() > 0 {
-                                        if cols.iter().any(|&x| x > field_counter){
+                                    results.num_fields = if !cols.is_empty() {
+                                        if cols.iter().any(|&x| x > field_counter) {
                                             return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                        }else{
+                                        } else {
                                             cols.len()
                                         }
-                                    }else{
+                                    } else {
                                         field_counter
                                     };
                                 }
                                 if (field_counter != tot_fields) & (field_counter != 0) {
-                                    return Err(format_err!("Newline (delim) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                    return Err(format_err!(
+                                        "Newline (delim) Number of fields,{}, provided at line {} 
+                                    is different than the initial field number of {}",
+                                        field_counter,
+                                        fln,
+                                        tot_fields
+                                    ));
                                 }
                                 field_counter = 0;
                                 results.num_lines += 1;
-                            }else{
-                                return Err(format_err!("Number of fields provided at line {} 
-                                    ends with a delimiter instead of a field or white space", fln));
+                            } else {
+                                return Err(format_err!(
+                                    "Number of fields provided at line {} 
+                                    ends with a delimiter instead of a field or white space",
+                                    fln
+                                ));
                             }
                             ParseState::NwLine
                         }
                         ParseState::SkField => {
                             if results.num_lines == 0 {
                                 tot_fields = field_counter;
-                                results.num_fields = if cols.len() > 0 {
-                                    if cols.iter().any(|&x| x > field_counter){
+                                results.num_fields = if !cols.is_empty() {
+                                    if cols.iter().any(|&x| x > field_counter) {
                                         return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                    }else{
+                                    } else {
                                         cols.len()
                                     }
-                                }else{
+                                } else {
                                     field_counter
                                 };
                             }
                             if field_counter != tot_fields {
-                                return Err(format_err!("Newline (skip field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                return Err(format_err!(
+                                    "Newline (skip field) Number of fields,{}, provided at line {} 
+                                is different than the initial field number of {}",
+                                    field_counter,
+                                    fln,
+                                    tot_fields
+                                ));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
@@ -407,85 +393,98 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                             results.index.push(results.results.len());
                             if results.num_lines == 0 {
                                 tot_fields = field_counter;
-                                results.num_fields = if cols.len() > 0 {
-                                    if cols.iter().any(|&x| x > field_counter){
+                                results.num_fields = if !cols.is_empty() {
+                                    if cols.iter().any(|&x| x > field_counter) {
                                         return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                    }else{
+                                    } else {
                                         cols.len()
                                     }
-                                }else{
+                                } else {
                                     field_counter
                                 };
                             }
                             if field_counter != tot_fields {
-                                return Err(format_err!("Newline (field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                return Err(format_err!(
+                                    "Newline (field) Number of fields,{}, provided at line {} 
+                                is different than the initial field number of {}",
+                                    field_counter,
+                                    fln,
+                                    tot_fields
+                                ));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
                             ParseState::NwLine
                         }
-                        ParseState::Space => {
-                            ParseState::NwLine
-                        }
+                        ParseState::Space => ParseState::NwLine,
                     };
-                }else if buffer[i] == cmt {
+                } else if buffer[i] == cmt {
                     let val = newline.next();
                     i = match val {
                         Some(val) => val + 1,
                         None => length,
                     };
                     fln += 1;
-                    state = match state{
-                        ParseState::NwLine => {
-                            ParseState::NwLine
-                        }
+                    state = match state {
+                        ParseState::NwLine => ParseState::NwLine,
                         ParseState::Delim => {
                             if delim_ws {
-                                field_counter = field_counter - 1;
-                                if (results.num_lines == 0) & (field_counter != 0){
+                                field_counter -= 1;
+                                if (results.num_lines == 0) & (field_counter != 0) {
                                     tot_fields = field_counter;
-                                    results.num_fields = if cols.len() > 0 {
-                                        if cols.iter().any(|&x| x > field_counter){
+                                    results.num_fields = if !cols.is_empty() {
+                                        if cols.iter().any(|&x| x > field_counter) {
                                             return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                        }else{
+                                        } else {
                                             cols.len()
                                         }
-                                    }else{
+                                    } else {
                                         field_counter
                                     };
                                 }
                                 if (field_counter != tot_fields) & (field_counter != 0) {
-                                    return Err(format_err!("Cmt (delim) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                    return Err(format_err!(
+                                        "Cmt (delim) Number of fields,{}, provided at line {} 
+                                    is different than the initial field number of {}",
+                                        field_counter,
+                                        fln,
+                                        tot_fields
+                                    ));
                                 }
-                                if field_counter > 0{
+                                if field_counter > 0 {
                                     field_counter = 0;
                                     results.num_lines += 1;
                                 }
-
-                            }else{
-                                return Err(format_err!("Number of fields provided at line {} 
-                                    ends with a delimiter instead of a field or white space", fln));
+                            } else {
+                                return Err(format_err!(
+                                    "Number of fields provided at line {} 
+                                    ends with a delimiter instead of a field or white space",
+                                    fln
+                                ));
                             }
                             ParseState::NwLine
                         }
                         ParseState::SkField => {
                             if results.num_lines == 0 {
                                 tot_fields = field_counter;
-                                results.num_fields = if cols.len() > 0 {
-                                    if cols.iter().any(|&x| x > field_counter){
+                                results.num_fields = if !cols.is_empty() {
+                                    if cols.iter().any(|&x| x > field_counter) {
                                         return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                    }else{
+                                    } else {
                                         cols.len()
                                     }
-                                }else{
+                                } else {
                                     field_counter
                                 };
                             }
                             if field_counter != tot_fields {
-                                return Err(format_err!("Cmt (skip field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                return Err(format_err!(
+                                    "Cmt (skip field) Number of fields,{}, provided at line {} 
+                                is different than the initial field number of {}",
+                                    field_counter,
+                                    fln,
+                                    tot_fields
+                                ));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
@@ -494,80 +493,75 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                         ParseState::Field => {
                             if results.num_lines == 0 {
                                 tot_fields = field_counter;
-                                results.num_fields = if cols.len() > 0 {
-                                    if cols.iter().any(|&x| x > field_counter){
+                                results.num_fields = if !cols.is_empty() {
+                                    if cols.iter().any(|&x| x > field_counter) {
                                         return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
-                                    }else{
+                                    } else {
                                         cols.len()
                                     }
-                                }else{
+                                } else {
                                     field_counter
                                 };
                             }
                             results.index.push(results.results.len());
                             if field_counter != tot_fields {
-                                return Err(format_err!("Cmt (field) Number of fields,{}, provided at line {} 
-                                is different than the initial field number of {}", field_counter, fln, tot_fields));
+                                return Err(format_err!(
+                                    "Cmt (field) Number of fields,{}, provided at line {} 
+                                is different than the initial field number of {}",
+                                    field_counter,
+                                    fln,
+                                    tot_fields
+                                ));
                             }
                             results.num_lines += 1;
                             field_counter = 0;
                             ParseState::NwLine
                         }
-                        ParseState::Space => {
-                            ParseState::NwLine
-                        }
+                        ParseState::Space => ParseState::NwLine,
                     };
-                }else{
-                    state = match state{
+                } else {
+                    state = match state {
                         ParseState::NwLine => {
                             field_counter = 1;
-                            match &cols.len(){
-                                0 =>{
+                            match &cols.len() {
+                                0 => {
                                     results.results.push(buffer[i]);
 
                                     ParseState::Field
                                 }
-                                _ =>{
+                                _ => {
                                     let pos = cols.iter().position(|&x| x == field_counter);
-                                    match pos{
-                                        Some(_x) =>{
+                                    match pos {
+                                        Some(_x) => {
                                             results.results.push(buffer[i]);
 
                                             ParseState::Field
                                         }
-                                        None => {
-                                            ParseState::SkField
-                                        }
+                                        None => ParseState::SkField,
                                     }
                                 }
                             }
                         }
-                        ParseState::Delim => {
-                            match &cols.len(){
-                                0 =>{
-                                    results.results.push(buffer[i]);
+                        ParseState::Delim => match &cols.len() {
+                            0 => {
+                                results.results.push(buffer[i]);
 
-                                    ParseState::Field
-                                }
-                                _ =>{
-                                    let pos = cols.iter().position(|&x| x == field_counter);
-                                    match pos{
-                                        Some(_x) =>{
-                                            results.results.push(buffer[i]);
+                                ParseState::Field
+                            }
+                            _ => {
+                                let pos = cols.iter().position(|&x| x == field_counter);
+                                match pos {
+                                    Some(_x) => {
+                                        results.results.push(buffer[i]);
 
-                                            ParseState::Field
-                                        }
-                                        None => {
-                                            ParseState::SkField
-                                        }
+                                        ParseState::Field
                                     }
+                                    None => ParseState::SkField,
                                 }
                             }
-                        }
-                        ParseState::SkField => {
-                            ParseState::SkField
-                        }
-                        ParseState::Field =>{
+                        },
+                        ParseState::SkField => ParseState::SkField,
+                        ParseState::Field => {
                             results.results.push(buffer[i]);
 
                             ParseState::Field
@@ -577,23 +571,21 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                             if field_counter == 0 {
                                 field_counter += 1;
                             }
-                            match &cols.len(){
-                                0 =>{
+                            match &cols.len() {
+                                0 => {
                                     results.results.push(buffer[i]);
 
                                     ParseState::Field
                                 }
-                                _ =>{
+                                _ => {
                                     let pos = cols.iter().position(|&x| x == field_counter);
-                                    match pos{
-                                        Some(_x) =>{
+                                    match pos {
+                                        Some(_x) => {
                                             results.results.push(buffer[i]);
 
                                             ParseState::Field
                                         }
-                                        None => {
-                                            ParseState::SkField
-                                        }
+                                        None => ParseState::SkField,
                                     }
                                 }
                             }
@@ -611,13 +603,10 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         //We now need to consume everything in our buffer, so it's marked off as no longer being needed
         reader.consume(length);
         //If our length is less than our fixed buffer size we've reached the end of our file and can now exit.
-        if length < BUF_SIZE{
-            break;
-        }else if results.num_lines == num_lines_read {
+        if (length < BUF_SIZE) | (results.num_lines == num_lines_read) {
             break;
         }
     }
     //Assumming everything went well we save off our results.
     Ok(results)
-
 }

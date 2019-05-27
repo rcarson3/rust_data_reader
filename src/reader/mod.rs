@@ -100,10 +100,52 @@ impl Default for ReaderParams {
 ///along with the number of lines that we read. Finally, the results are stored in a single Vec of
 ///type T. Type T is what type one called load_txt_* for.
 #[derive(Debug, Clone)]
-pub struct ReaderResults<T: FromStr> {
+pub struct ReaderResults<T: FromStr + Clone> {
     pub num_fields: usize,
     pub num_lines: usize,
     pub results: Vec<T>,
+}
+
+impl<T: FromStr + Clone> ReaderResults<T> {
+    ///Obtains a value for a given row and column where both indices inputted
+    ///are 0 based.
+    pub fn get_value(&self, row_index: usize, col_index: usize) -> T {
+        assert!(row_index < self.num_lines);
+        assert!(col_index < self.num_fields);
+        self.results[row_index * self.num_fields + col_index].clone()
+    }
+    ///Returns a row given a valid index that is 0 based.
+    pub fn get_row(&self, row_index: usize) -> Vec<T> {
+        assert!(row_index < self.num_lines);
+
+        let out: Vec<T> = self
+            .results
+            .iter()
+            .skip(row_index * self.num_fields)
+            .take(self.num_fields)
+            .cloned()
+            .collect();
+
+        assert!(out.len() == self.num_fields);
+
+        out
+    }
+    ///Returns a given column given a valid index that is 0 based.
+    pub fn get_col(&self, col_index: usize) -> Vec<T> {
+        assert!(col_index < self.num_fields);
+        //We should just be able to use a slice to obtaine the values we want
+        let out: Vec<T> = self
+            .results
+            .iter()
+            .skip(col_index)
+            .step_by(self.num_fields)
+            .cloned()
+            .collect();
+
+        assert!(out.len() == self.num_lines);
+
+        out
+    }
 }
 
 ///A structure that contains all of the raw results. It tells us the number of fields we had
@@ -174,13 +216,7 @@ pub fn read_num_file_lines(f: &File, com: u8) -> usize {
                 //we can exit the loop.
                 if (buffer[i] == b' ') | (buffer[i] == b'\t') {
                     i += 1;
-                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
-                    let val = newline.next();
-                    i = match val {
-                        Some(val) => val + 1,
-                        None => length,
-                    };
-                } else if buffer[i] == com {
+                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') | (buffer[i] == com) {
                     let val = newline.next();
                     i = match val {
                         Some(val) => val + 1,
