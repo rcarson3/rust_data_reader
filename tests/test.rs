@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate data_reader;
-extern crate lexical;
 extern crate failure;
+extern crate lexical;
 use data_reader::reader::*;
 use failure::Error;
 
@@ -68,9 +68,9 @@ fn load_txt_i32_test() {
 fn load_txt_i32_reader_params_constructor_test() {
     let file = String::from("int_testv2.txt");
 
-    let params = ReaderParams{
-            comments: Some(b'%'),
-            ..Default::default()
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
@@ -114,7 +114,7 @@ fn load_txt_i32_test_sk_f() {
     //     max_rows: None,
     // };
 
-    let params = ReaderParams{
+    let params = ReaderParams {
         comments: Some(b'%'),
         skip_footer: Some(5),
         ..Default::default()
@@ -207,23 +207,12 @@ fn load_txt_i32_test_u_cols() {
 
     let results = results.unwrap();
 
-    assert_eq!(
-        results.results,
-        vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
-    );
+    assert_eq!(results.results, vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]);
 
-    assert_eq!(
-        results.num_fields,
-        1
-    );
+    assert_eq!(results.num_fields, 1);
 
-    assert_eq!(
-        results.num_lines,
-        10
-    );
-
+    assert_eq!(results.num_lines, 10);
 }
-
 
 #[test]
 #[should_panic]
@@ -540,17 +529,23 @@ fn load_txt_f64_sci_test() {
 
     let results = load_txt_f64(file_ref, params_ref);
 
-    let end_results = vec![7.211103267499999192e-02, -3.999458292499999401e-01, -1.908364359999999982e-01, 
-                           5.252514306249998766e-02, -3.486972928750000089e-01, -2.022221066250000088e-01,
-                           3.201516763750000133e-02, -3.624113797500000400e-01, -2.229083163749999985e-01];
+    let end_results = vec![
+        7.211103267499999192e-02,
+        -3.999458292499999401e-01,
+        -1.908364359999999982e-01,
+        5.252514306249998766e-02,
+        -3.486972928750000089e-01,
+        -2.022221066250000088e-01,
+        3.201516763750000133e-02,
+        -3.624113797500000400e-01,
+        -2.229083163749999985e-01,
+    ];
 
     let comp = &results.unwrap().results;
     let len = comp.len();
-    let slice = &comp[(len - 9) .. len];
+    let slice = &comp[(len - 9)..len];
 
-    assert_eq!(
-        slice, &end_results[..]
-    );
+    assert_eq!(slice, &end_results[..]);
 }
 
 //The test file for this has 0 commented lines in it
@@ -627,16 +622,16 @@ fn load_txt_char_test() {
 
 //Everything needed for our custom type
 #[derive(Debug, PartialEq, Clone)]
-struct MinInt{
+struct MinInt {
     x: i32,
 }
 //A simple example of implementing the FromStr trait for our custom type
-impl FromStr for MinInt{
+impl FromStr for MinInt {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<MinInt, failure::Error> {
         let temp = -1 * i32::from_str(s)?;
-        Ok(MinInt{x: temp})
+        Ok(MinInt { x: temp })
     }
 }
 
@@ -657,7 +652,6 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
     let ref_file = &file;
     let ref_params = &params;
 
-
     let results: Result<ReaderResults<MinInt>, Error> = load_text!(ref_file, ref_params, MinInt);
 
     let temp = results.unwrap().results.clone();
@@ -667,11 +661,124 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
     assert_eq!(
         vals,
         vec![
-            -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14,
-            -15, -16, -17, -18, -19, -20, -21, -22, -23, -24, -25, -26, -27,
-            -28, -29, -30
+            -1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19,
+            -20, -21, -22, -23, -24, -25, -26, -27, -28, -29, -30
         ]
     );
 
     Ok(())
+}
+
+#[test]
+fn get_value_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    assert_eq!(results.get_value(0, 2), 3);
+}
+
+#[test]
+#[should_panic]
+fn get_value_test_fail() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let _value = results.get_value(1, 3);
+}
+
+#[test]
+fn get_row_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    assert_eq!(results.get_row(0), vec![1, 2, 3]);
+}
+
+#[test]
+#[should_panic]
+fn get_row_test_fail() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let _value = results.get_row(10);
+}
+
+#[test]
+fn get_col_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    assert_eq!(
+        results.get_col(2),
+        vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
+    );
+}
+
+#[test]
+#[should_panic]
+fn get_col_test_fail() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let _value = results.get_col(3);
 }

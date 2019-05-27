@@ -73,11 +73,10 @@ macro_rules! load_text_lexical {
 ///Output - A Result type that either contains a ReaderResults structure or an error.
 #[doc(hidden)]
 macro_rules! load_text_lossy {
-    ($f:expr, $params:expr, $type: ident) => {
-        {
-                //Get the raw results
+    ($f:expr, $params:expr, $type: ident) => {{
+        //Get the raw results
         let raw_results = parse_txt($f, $params)?;
-        
+
         //We are initializing our ReaderResult structure
         let num_items = raw_results.index.len();
 
@@ -121,11 +120,10 @@ macro_rules! load_text_lossy {
 ///Output - A Result type that either contains a ReaderResults structure or an error.
 #[macro_export]
 macro_rules! load_text {
-    ($f:expr, $params:expr, $type: ident) => {
-        {
+    ($f:expr, $params:expr, $type: ident) => {{
         //Get the raw results
         let raw_results = parse_txt($f, $params)?;
-        
+
         //We are initializing our ReaderResult structure
         let num_items = raw_results.index.len();
 
