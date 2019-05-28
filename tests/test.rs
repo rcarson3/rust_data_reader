@@ -744,6 +744,48 @@ fn get_row_test_fail() {
 }
 
 #[test]
+fn get_rows_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let row_indices = vec![0, 1];
+
+    let vals = vec![vec![1, 2, 3], vec![4, 5, 6]];
+
+    assert_eq!(results.get_rows(row_indices), vals);
+}
+
+#[test]
+#[should_panic]
+fn get_rows_test_fail() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+    let row_indices = vec![0, 10];
+
+    let _value = results.get_rows(row_indices);
+}
+
+#[test]
 fn get_col_test() {
     let file = String::from("int_testv2.txt");
 
@@ -781,4 +823,50 @@ fn get_col_test_fail() {
     let results = load_txt_i64(&file, &params).unwrap();
 
     let _value = results.get_col(3);
+}
+
+#[test]
+fn get_cols_test() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let col_indices = vec![0, 2];
+
+    let vals = vec![
+        vec![1, 4, 7, 10, 13, 16, 19, 22, 25, 28],
+        vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30],
+    ];
+
+    assert_eq!(results.get_cols(col_indices), vals);
+}
+
+#[test]
+#[should_panic]
+fn get_cols_test_fail() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+    };
+
+    let results = load_txt_i64(&file, &params).unwrap();
+
+    let col_indices = vec![0, 3];
+
+    let _value = results.get_cols(col_indices);
 }

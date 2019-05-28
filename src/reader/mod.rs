@@ -114,7 +114,8 @@ impl<T: FromStr + Clone> ReaderResults<T> {
         assert!(col_index < self.num_fields);
         self.results[row_index * self.num_fields + col_index].clone()
     }
-    ///Returns a row given a valid index that is 0 based.
+    ///Returns a row given a valid index that is 0 based and less than the
+    ///number of lines read in.
     pub fn get_row(&self, row_index: usize) -> Vec<T> {
         assert!(row_index < self.num_lines);
 
@@ -126,11 +127,21 @@ impl<T: FromStr + Clone> ReaderResults<T> {
             .cloned()
             .collect();
 
-        assert!(out.len() == self.num_fields);
+        out
+    }
+    ///Returns a series of rows given a valid indices that are 0 based and less than the
+    ///number of lines read in.
+    pub fn get_rows(&self, row_indices: Vec<usize>) -> Vec<Vec<T>> {
+        let mut out: Vec<Vec<T>> = Vec::new();
+
+        for index in row_indices.iter() {
+            out.push(self.get_row(*index));
+        }
 
         out
     }
-    ///Returns a given column given a valid index that is 0 based.
+    ///Returns a given column given a valid index that is 0 based and less than the
+    ///number of fields read in.
     pub fn get_col(&self, col_index: usize) -> Vec<T> {
         assert!(col_index < self.num_fields);
         //We should just be able to use a slice to obtaine the values we want
@@ -142,7 +153,16 @@ impl<T: FromStr + Clone> ReaderResults<T> {
             .cloned()
             .collect();
 
-        assert!(out.len() == self.num_lines);
+        out
+    }
+    ///Returns a series of rows given a valid indices that are 0 based and less than the
+    ///number of lines read in.
+    pub fn get_cols(&self, col_indices: Vec<usize>) -> Vec<Vec<T>> {
+        let mut out: Vec<Vec<T>> = Vec::new();
+
+        for index in col_indices.iter() {
+            out.push(self.get_col(*index));
+        }
 
         out
     }
