@@ -53,7 +53,7 @@ macro_rules! load_text_lexical {
             assert!(j < raw_results.results.len());
             assert!(j < k);
             let slice = &raw_results.results[j..k];
-            let temp: $type = lexical::try_parse::<$type, _>(slice).unwrap();
+            let temp: $type = lexical::parse::<$type, _>(slice).unwrap();
             results.results.push(temp);
         }
 
@@ -102,7 +102,7 @@ macro_rules! load_text_lossy {
             assert!(j < raw_results.results.len());
             assert!(j < k);
             let slice = &raw_results.results[j..k];
-            let temp: $type = lexical::try_parse_lossy::<$type, _>(slice)?;
+            let temp: $type = lexical::parse_lossy::<$type, _>(slice).unwrap();
             results.results.push(temp);
         }
 
