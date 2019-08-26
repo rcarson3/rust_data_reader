@@ -158,11 +158,9 @@
 //!
 //! * 0.1.0 - Initial crates.io release
 
-extern crate bytecount;
 #[macro_use]
 extern crate failure;
 extern crate lexical;
-extern crate memchr;
 
 ///Contains all of the functions related to the different readers that will be generated.
 #[macro_use]

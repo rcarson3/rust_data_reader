@@ -215,16 +215,9 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
 
     let mut state = ParseState::NwLine;
     //Next we need to get a list of our columns we might be using. If we aren't we supply an empty vector, so we can easily check if the len is 0.
-    //We also do a simple check to see if any of the supplied values are equal to 0. If they are we exit early with an error.
+    //While these values are 0 indexed externally, internally it's a bit easier to deal with 1-based indexing for the time being.
     let cols = match &params.usecols {
-        Some(x) => {
-            let x = if x.iter().any(|&x| x == 0) {
-                return Err(format_err!("Input for usecols contains a value equal to 0. Values should be greater than 0"));
-            } else {
-                x.clone()
-            };
-            x
-        }
+        Some(x) => x.iter().map(|&x| x + 1).collect::<Vec<usize>>(),
         None => Vec::<usize>::new(),
     };
 
@@ -335,7 +328,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                     tot_fields = field_counter;
                                     results.num_fields = if !cols.is_empty() {
                                         if cols.iter().any(|&x| x > field_counter) {
-                                            return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                            return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                         } else {
                                             cols.len()
                                         }
@@ -368,7 +361,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 tot_fields = field_counter;
                                 results.num_fields = if !cols.is_empty() {
                                     if cols.iter().any(|&x| x > field_counter) {
-                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                     } else {
                                         cols.len()
                                     }
@@ -395,7 +388,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 tot_fields = field_counter;
                                 results.num_fields = if !cols.is_empty() {
                                     if cols.iter().any(|&x| x > field_counter) {
-                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                     } else {
                                         cols.len()
                                     }
@@ -434,7 +427,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                     tot_fields = field_counter;
                                     results.num_fields = if !cols.is_empty() {
                                         if cols.iter().any(|&x| x > field_counter) {
-                                            return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                            return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                         } else {
                                             cols.len()
                                         }
@@ -469,7 +462,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 tot_fields = field_counter;
                                 results.num_fields = if !cols.is_empty() {
                                     if cols.iter().any(|&x| x > field_counter) {
-                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                     } else {
                                         cols.len()
                                     }
@@ -495,7 +488,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                                 tot_fields = field_counter;
                                 results.num_fields = if !cols.is_empty() {
                                     if cols.iter().any(|&x| x > field_counter) {
-                                        return Err(format_err!("Input for usecols contains a value greater than the number of fields {}", field_counter));
+                                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", field_counter));
                                     } else {
                                         cols.len()
                                     }

@@ -192,7 +192,7 @@ fn load_txt_i32_test_sk_f_big() {
 fn load_txt_i32_test_u_cols() {
     let file = String::from("int_testv2.txt");
 
-    let cols: Vec<usize> = vec![3];
+    let cols: Vec<usize> = vec![2];
 
     let params = ReaderParams {
         comments: Some(b'%'),
@@ -216,10 +216,10 @@ fn load_txt_i32_test_u_cols() {
 
 #[test]
 #[should_panic]
-fn load_txt_i32_test_u_cols_0() {
+fn load_txt_i32_test_u_cols_at_bnds() {
     let file = String::from("int_testv2.txt");
 
-    let cols: Vec<usize> = vec![0];
+    let cols: Vec<usize> = vec![3];
 
     let params = ReaderParams {
         comments: Some(b'%'),
@@ -243,7 +243,7 @@ fn load_txt_i32_test_u_cols_0() {
 fn load_txt_i32_test_u_cols_out_bnds() {
     let file = String::from("int_testv2.txt");
 
-    let cols: Vec<usize> = vec![6];
+    let cols: Vec<usize> = vec![5];
 
     let params = ReaderParams {
         comments: Some(b'%'),
