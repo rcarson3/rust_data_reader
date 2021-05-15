@@ -21,13 +21,13 @@ exclude = [
 ]
 
 [dependencies] 
-bytecount = "0.5.1"
+bytecount = "0.6.2"
 failure = "0.1.5"
 memchr = "2.2.1"
-lexical = "3.0.0"
+lexical = "5.2.2"
 
 [dev-dependencies]
-criterion = "0.3.0"
+criterion = "0.3.4"
 [[bench]]
 name = "examples"
 harness = false

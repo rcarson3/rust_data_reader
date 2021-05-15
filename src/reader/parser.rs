@@ -44,8 +44,8 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         Space,
         Field,
         SkField,
-    };
-    let mut file = File::open(f)?;
+    }
+    let file = File::open(f)?;
 
     //our comment string
     //If we don't have one then we just say a comment is a newline character.
@@ -57,13 +57,13 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         b'\n'
     };
 
-    //We are finding how many lines in our data file are actually readable and are not commented lines.
-    let num_lines = read_num_file_lines(&file, cmt);
-    //We need to rewind our file back to the start.
-    file.seek(SeekFrom::Start(0))?;
-
     //We're explicitly using the raw bytes here
     let mut reader = BufReader::with_capacity(BUF_SIZE, file);
+
+    //We are finding how many lines in our data file are actually readable and are not commented lines.
+    let num_lines = read_num_file_lines(& mut reader, cmt);
+    //We need to rewind our file back to the start.
+    reader.seek(SeekFrom::Start(0))?;
 
     //We are initializing our ReaderResult structure
     let mut results = RawReaderResults {
@@ -199,7 +199,7 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
                     }
                 }
                 //Pass off our length to set our length outside of this block of code
-                (i - 1)
+                i - 1
             };
             //We now need to consume everything upto "length" in our buffer, so it's marked off as no longer being needed
             reader.consume(length);

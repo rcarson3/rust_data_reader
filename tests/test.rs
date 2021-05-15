@@ -7,31 +7,34 @@ use failure::Error;
 
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::SeekFrom;
+use std::io::{BufReader, SeekFrom};
 use std::str;
 use std::str::FromStr;
 use std::vec::*;
 
+const BUF_SIZE: usize = 8 * (1 << 12);
 #[test]
 fn read_num_file_line_test() {
-    let mut file = File::open("LICENSE-APACHE").unwrap();
-    let tot_num_lines = read_num_file_tot_lines(&mut file);
+    let file = File::open("LICENSE-APACHE").unwrap();
+    let mut reader = BufReader::with_capacity(BUF_SIZE, file);
+    let tot_num_lines = read_num_file_tot_lines(&mut reader);
     println!("The total number of lines in the file is {}", tot_num_lines);
     //Rewind it back to the start.
-    file.seek(SeekFrom::Start(0)).unwrap();
-    let num_lines = read_num_file_lines(&mut file, b'#');
+    reader.seek(SeekFrom::Start(0)).unwrap();
+    let num_lines = read_num_file_lines(&mut reader, b'#');
     println!(
         "The number of lines in the file minus comments is {}",
         num_lines
     );
     assert_eq!((tot_num_lines - num_lines), 32);
 
-    let mut file = File::open("int_testv3.txt").unwrap();
-    let tot_num_lines = read_num_file_tot_lines(&mut file);
+    let file = File::open("int_testv3.txt").unwrap();
+    let mut reader = BufReader::with_capacity(BUF_SIZE, file);
+    let tot_num_lines = read_num_file_tot_lines(&mut reader);
     println!("The total number of lines in the file is {}", tot_num_lines);
     //Rewind it back to the start.
-    file.seek(SeekFrom::Start(0)).unwrap();
-    let num_lines = read_num_file_lines(&mut file, b'%');
+    reader.seek(SeekFrom::Start(0)).unwrap();
+    let num_lines = read_num_file_lines(&mut reader, b'%');
     println!(
         "The number of lines in the file minus comments is {}",
         num_lines

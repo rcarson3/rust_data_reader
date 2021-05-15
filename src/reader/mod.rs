@@ -17,7 +17,7 @@ use bytecount;
 use lexical;
 use memchr::memchr2_iter;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Read, SeekFrom};
+use std::io::{BufRead, BufReader, SeekFrom};
 use std::str;
 use std::str::FromStr;
 use std::vec::*;
@@ -66,6 +66,7 @@ pub enum Delimiter {
 ///     where these values should be >= 0. Values are 0 indexed here.
 ///
 /// max_rows - an optional field that tells us the maximum number of rows we should use from the file
+/// is_string - an optional field that tells us if the string passed is a string or file
 pub struct ReaderParams {
     pub comments: Option<u8>,
     pub delimiter: Delimiter,
@@ -73,6 +74,7 @@ pub struct ReaderParams {
     pub skip_footer: Option<usize>,
     pub usecols: Option<Vec<usize>>,
     pub max_rows: Option<usize>,
+    // pub is_string: Option<bool>,
 }
 
 ///You can use the default constructor like this:
@@ -93,6 +95,7 @@ impl Default for ReaderParams {
             skip_footer: None,
             usecols: None,
             max_rows: None,
+            // is_string: None,
         }
     }
 }
@@ -181,20 +184,23 @@ pub struct RawReaderResults {
 }
 
 ///A private function that counts the number of lines that match a specified character specified to it.
-///It is assummed that this character only appears once per line.
+///It is assumed that this character only appears once per line.
 fn count_lines(buf: &[u8], eol: u8) -> usize {
     bytecount::count(buf, eol) as usize
 }
 
-///It simply reads all of the lines in the file when an end of line is denoted by \n.
-///It does not take into account whether any line is a comment or not.
-pub fn read_num_file_tot_lines(f: &mut File) -> usize {
-    let mut buffer = vec![0u8; BUF_SIZE];
+/// It simply reads all of the lines in the file when an end of line is denoted by \n.
+/// It does not take into account whether any line is a comment or not.
+// Could probably just pass in a BufReader instead of file to make it more generic
+// Actually, it looks like we can definitely do that and then just seek back to beginning.
+pub fn read_num_file_tot_lines<R: BufRead>(reader: &mut R) -> usize {
     let mut count = 0;
-
     loop {
-        let length = f.read(buffer.as_mut_slice()).unwrap();
+        let buffer = reader.fill_buf().unwrap();
+        let length = buffer.len();
         count += count_lines(&buffer[0..length], b'\n');
+        //We now need to consume everything in our buffer, so it's marked off as no longer being needed
+        reader.consume(length);
         if length < BUF_SIZE {
             break;
         }
@@ -205,10 +211,13 @@ pub fn read_num_file_tot_lines(f: &mut File) -> usize {
 
 ///It simply reads all of the lines in the file when an end of line is denoted by \n or \r.
 ///A comment character is provided and if it is seen then before any nonwhite space the line is not counted in the total.
-pub fn read_num_file_lines(f: &File, com: u8) -> usize {
+// Could probably just pass in a BufReader instead of file to make it more generic.
+// We just need to be smart about how the BufReader is dealt with...
+// Actually, it looks like we can definitely do that and then just seek back to beginning.
+pub fn read_num_file_lines<R: BufRead>(reader: & mut R, com: u8) -> usize {
     let mut count = 0;
     //We're explicitly using the raw bytes here
-    let mut reader = BufReader::with_capacity(BUF_SIZE, f);
+    // let mut reader = BufReader::with_capacity(BUF_SIZE, f);
     //We loop over until the file has been completely read
     loop {
         //We first find the length of our buffer
