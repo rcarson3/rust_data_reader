@@ -57,7 +57,7 @@ fn parser_txt_large_test() {
 fn test_wrapper(c: &mut Criterion) {
     let mut group = c.benchmark_group("Load_or_Parse_Sci_Txt");
 
-    group.sample_size(25);
+    group.sample_size(10);
     group.bench_function("Load_txt_float", |b| {
         b.iter(|| load_txt_f64_large_test())
     });
