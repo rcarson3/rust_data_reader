@@ -16,7 +16,7 @@ f32 f64
 char bool String
 ```
 
-The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, I was able to obtain 135MB/s for the read in speeds. 
+The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, I was able to obtain 190MB/s for the read in speeds.
 
 If the type you're intrested in supports the ```FromStr``` trait you can also use this crate you can use the bottom example for how to use the ```load_txt!``` macro to load up a custom data type.
 

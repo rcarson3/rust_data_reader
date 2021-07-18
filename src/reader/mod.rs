@@ -15,6 +15,7 @@
 
 use bytecount;
 use lexical;
+use fast_float;
 use memchr::memchr2_iter;
 use std::fs::File;
 use std::io::{BufRead};

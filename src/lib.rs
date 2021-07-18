@@ -161,6 +161,7 @@
 #[macro_use]
 extern crate failure;
 extern crate lexical;
+extern crate fast_float;
 
 ///Contains all of the functions related to the different readers that will be generated.
 #[macro_use]
