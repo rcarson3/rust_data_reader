@@ -1,11 +1,11 @@
 [package]
 name = "data_reader"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["rcarson3 <rac428@cornell.edu>"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 edition = "2018"
-publish = false
+publish = true
 
 repository = "https://github.com/rcarson3/rust_data_reader/"
 

@@ -16,14 +16,12 @@ f32 f64
 char bool String
 ```
 
-The primitive uint, int, and floats use the lexical crate to provide a faster conversion from string to the given type. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, I was able to obtain 190MB/s for the read in speeds.
+The primitive uint and int use the lexical crate to provide a faster conversion from string to the given type. Floats are converted from strings to the given type using the fast-float crate. The other types use the built in standard library from_str conversion. The read in data is all stored into a vector. A struct is returned from the method ```load_text_*``` that provides the number of lines read, the number of columns read from the data, and a vector containing the data. This struct is wrapped into a Result that is returned to the user. For a 1GB float64 type file read from an SSD, I was able to obtain 190MB/s for the read in speeds.
 
 If the type you're intrested in supports the ```FromStr``` trait you can also use this crate you can use the bottom example for how to use the ```load_txt!``` macro to load up a custom data type.
 
 # Roadmap
-Update the backend such that it makes it possible to have multiple data types in the file being read.
-
-Provide access to a macro to build the reader into their own code which could give the compiler the necessary information to optimize away dead branches.
+Update the error trait to one of the more current standard ways of doing it now that Failure is no longer maintained.
 
 # Example
 An example of how to use the code can be seen down below:
@@ -131,6 +129,8 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
 ```
 
 # Versions
+* 0.4.0 - Updated UseCols to be 0 based. Updated several public facing functions to take in different types. Added a mmap version of the parser behind a feature flag. Updated a number of crates and swapped the float parsing backend from lexical to the fast-float crate for a large increase in performance (135MB/s to 190MB/s on my machine). Added a number of functions to the ReaderResults struct to allow users to pull out given row(s) or col(s).
+
 * 0.3.0 - A bug was noted in the use_cols field of the ReaderParams struct that allowed you to input values that weren't useable. Also, the ReaderParams comment field was updated to being an option. Additional documentation was also added to note that the use_cols field assumes values start with an index of 1.
 * 0.2.0 - A new parsing backend has been added which saw a 40% improvement parsing/reading in a large 1GB file of all f64s. Exposed the parser to the end user so the user can deal with the raw bytes if they would enjoy doing so. Any type that now supports the ```FromStr``` trait can be converted over.  
 
@@ -141,4 +141,3 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
 * 0.1.1 - Needed to update documentation for docs.rs
 
 * 0.1.0 - Initial crates.io release
-
