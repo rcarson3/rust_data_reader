@@ -36,6 +36,7 @@ mmap = ["memmap"]
 criterion = "0.3.4"
 [[bench]]
 name = "examples"
+path = "benches/examples.rs"
 harness = false
 [profile.release]
 opt-level = 3
