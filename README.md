@@ -67,7 +67,7 @@ Here's a more extensive example showing how to use custom types.
 ```Rust
 #[macro_use]
 extern crate data_reader;
-extern crate failure;
+extern crate anyhow;
 use data_reader::reader::*;
 use anyhow::Error;
 
