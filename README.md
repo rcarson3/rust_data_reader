@@ -21,7 +21,7 @@ The primitive uint and int use the lexical crate to provide a faster conversion 
 If the type you're intrested in supports the ```FromStr``` trait you can also use this crate you can use the bottom example for how to use the ```load_txt!``` macro to load up a custom data type.
 
 # Roadmap
-Update the error trait to one of the more current standard ways of doing it now that Failure is no longer maintained.
+Examine ways to get even larger performance wins for reading in large files.
 
 # Example
 An example of how to use the code can be seen down below:
@@ -69,7 +69,7 @@ Here's a more extensive example showing how to use custom types.
 extern crate data_reader;
 extern crate failure;
 use data_reader::reader::*;
-use failure::Error;
+use anyhow::Error;
 
 use std::str;
 use std::str::FromStr;
@@ -92,7 +92,7 @@ impl FromStr for MinInt{
 
 //The test file for this has 0 commented lines in it but using a custom type
 //The returned error is needed if we doing anything that's not in a function
-fn load_txt_custom_test() -> Result<(), failure::Error> {
+fn load_txt_custom_test() -> Result<(), anyhow::Error> {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {
@@ -129,6 +129,8 @@ fn load_txt_custom_test() -> Result<(), failure::Error> {
 ```
 
 # Versions
+* 0.5.0 (in progress) - Moved to anyhow from failure crate. Updated lexical crate to version 6.0 which allows us to get rid of dependency of fast-float crate as the performance wins in that crate had been ported over to lexical more or less. Update the memmap2 crate to 0.5.0. The only change on the end-user side of things should be swapping out `failure::Error` to `anyhow::Error` if they were using those previously.
+
 * 0.4.0 - Updated UseCols to be 0 based. Updated several public facing functions to take in different types. Added a mmap version of the parser behind a feature flag. Updated a number of crates and swapped the float parsing backend from lexical to the fast-float crate for a large increase in performance (135MB/s to 190MB/s on my machine). Added a number of functions to the ReaderResults struct to allow users to pull out given row(s) or col(s).
 
 * 0.3.0 - A bug was noted in the use_cols field of the ReaderParams struct that allowed you to input values that weren't useable. Also, the ReaderParams comment field was updated to being an option. Additional documentation was also added to note that the use_cols field assumes values start with an index of 1.

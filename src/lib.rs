@@ -159,9 +159,8 @@
 //! * 0.1.0 - Initial crates.io release
 
 #[macro_use]
-extern crate failure;
+extern crate anyhow;
 extern crate lexical;
-extern crate fast_float;
 
 ///Contains all of the functions related to the different readers that will be generated.
 #[macro_use]

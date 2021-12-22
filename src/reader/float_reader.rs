@@ -30,7 +30,7 @@ use super::*;
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>, Error> {
-    load_text_fast_float!(f, params, f32)
+    load_text_lexical!(f, params, f32)
 }
 
 ///load_txt_f64 reads in a data file that is made up of f64 type data. If this assumption is not made then the parser will fail
@@ -50,5 +50,5 @@ pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>
 /// A Result type that either contains a ReaderResults structure or an error.
 
 pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error> {
-    load_text_fast_float!(f, params, f64)
+    load_text_lexical!(f, params, f64)
 }

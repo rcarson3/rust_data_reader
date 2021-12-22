@@ -15,7 +15,6 @@
 
 use bytecount;
 use lexical;
-use fast_float;
 use memchr::memchr2_iter;
 use std::fs::File;
 use std::io::{BufRead};
@@ -25,8 +24,7 @@ use std::str;
 use std::str::FromStr;
 use std::vec::*;
 
-use failure::Error;
-// use failure::err_msg;
+use anyhow::Error;
 
 #[macro_use]
 #[doc(hidden)]
