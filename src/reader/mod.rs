@@ -1,4 +1,4 @@
-// This file is a part of the mori - Material Orientation Library in Rust
+// This file is a part of the Rust Data Reader Library
 // Copyright 2018 Robert Carson
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");

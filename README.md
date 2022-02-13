@@ -9,7 +9,7 @@ So far this code provides similar capabilities as Numpy's loadtxt to Rust. You c
 
 It provides support for the following primitive types:
 
-```Rust
+```rust
 u8 u16 u32 u64 u128 usize
 i8 i16 i32 i64 i128
 f32 f64
@@ -26,7 +26,7 @@ Examine ways to get even larger performance wins for reading in large files.
 # Example
 An example of how to use the code can be seen down below:
 
-```Rust
+```rust
 //This example shows us how we might skip a footer file
 fn load_txt_i32_test_sk_f(){
     //The file here is the one included in the main folder.
@@ -64,7 +64,7 @@ fn load_txt_i32_test_sk_f(){
 
 Here's a more extensive example showing how to use custom types.
 
-```Rust
+```rust
 #[macro_use]
 extern crate data_reader;
 extern crate anyhow;
