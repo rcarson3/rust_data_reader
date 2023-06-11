@@ -9,7 +9,8 @@ So far this code provides similar capabilities as Numpy's loadtxt to Rust. You c
 
 It provides support for the following primitive types:
 
-```rust
+
+```rust ignore
 u8 u16 u32 u64 u128 usize
 i8 i16 i32 i64 i128
 f32 f64
@@ -26,7 +27,17 @@ Examine ways to get even larger performance wins for reading in large files.
 # Example
 An example of how to use the code can be seen down below:
 
-```rust
+```rust ignore
+extern crate anyhow;
+#[macro_use]
+extern crate data_reader;
+use data_reader::reader::*;
+use anyhow::Error;
+
+use std::str;
+use std::str::FromStr;
+use std::vec::*;
+
 //This example shows us how we might skip a footer file
 fn load_txt_i32_test_sk_f(){
     //The file here is the one included in the main folder.
@@ -44,7 +55,7 @@ fn load_txt_i32_test_sk_f(){
         comments: Some(b'%'),
         delimiter: Delimiter::WhiteSpace,
         skip_header: None,
-        skip_footer: Some(5),
+        skip_footer: Some(5_usize),
         usecols: None,
         max_rows: None,
     };
@@ -64,10 +75,10 @@ fn load_txt_i32_test_sk_f(){
 
 Here's a more extensive example showing how to use custom types.
 
-```rust
+```rust ignore
+extern crate anyhow;
 #[macro_use]
 extern crate data_reader;
-extern crate anyhow;
 use data_reader::reader::*;
 use anyhow::Error;
 
@@ -84,7 +95,7 @@ struct MinInt{
 impl FromStr for MinInt{
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<MinInt, failure::Error> {
+    fn from_str(s: &str) -> Result<MinInt, anyhow::Error> {
         let temp = -1 * i32::from_str(s)?;
         Ok(MinInt{x: temp})
     }
@@ -129,7 +140,7 @@ fn load_txt_custom_test() -> Result<(), anyhow::Error> {
 ```
 
 # Versions
-* 0.5.0 (in progress) - Moved to anyhow from failure crate. Updated lexical crate to version 6.0 which allows us to get rid of dependency of fast-float crate as the performance wins in that crate had been ported over to lexical more or less. Update the memmap2 crate to 0.5.0. The only change on the end-user side of things should be swapping out `failure::Error` to `anyhow::Error` if they were using those previously.
+* 0.5.0 (in progress) - Moved to anyhow from failure crate. Updated lexical crate to version 6.0 which allows us to get rid of dependency of fast-float crate as the performance wins in that crate had been ported over to lexical more or less. Update the memmap2 crate to 0.5.0. The only change on the end-user side of things should be swapping out `anyhow::Error` to `anyhow::Error` if they were using those previously.
 
 * 0.4.0 - Updated UseCols to be 0 based. Updated several public facing functions to take in different types. Added a mmap version of the parser behind a feature flag. Updated a number of crates and swapped the float parsing backend from lexical to the fast-float crate for a large increase in performance (135MB/s to 190MB/s on my machine). Added a number of functions to the ReaderResults struct to allow users to pull out given row(s) or col(s).
 

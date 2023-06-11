@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate data_reader;
-extern crate failure;
+extern crate anyhow;
 extern crate lexical;
 use data_reader::reader::*;
-use failure::Error;
+
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -11,6 +11,8 @@ use std::io::{BufReader, SeekFrom};
 use std::str;
 use std::str::FromStr;
 use std::vec::*;
+
+use anyhow::Error;
 
 const BUF_SIZE: usize = 8 * (1 << 12);
 #[test]
@@ -632,7 +634,7 @@ struct MinInt {
 impl FromStr for MinInt {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<MinInt, failure::Error> {
+    fn from_str(s: &str) -> Result<MinInt, anyhow::Error> {
         let temp = -1 * i32::from_str(s)?;
         Ok(MinInt { x: temp })
     }
@@ -640,7 +642,7 @@ impl FromStr for MinInt {
 
 //The test file for this has 0 commented lines in it but using a custom type
 #[test]
-fn load_txt_custom_test() -> Result<(), failure::Error> {
+fn load_txt_custom_test() -> Result<(), anyhow::Error> {
     let file = String::from("int_testv2.txt");
 
     let params = ReaderParams {

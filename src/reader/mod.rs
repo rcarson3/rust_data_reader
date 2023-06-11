@@ -18,8 +18,9 @@ use lexical;
 use memchr::memchr2_iter;
 use std::fs::File;
 use std::io::{BufRead};
+use std::io::{SeekFrom};
 #[cfg(not(feature = "mmap"))]
-use std::io::{BufReader, SeekFrom};
+use std::io::{BufReader};
 use std::str;
 use std::str::FromStr;
 use std::vec::*;
@@ -32,22 +33,19 @@ mod macro_src;
 
 pub mod float_reader;
 pub mod int_reader;
-#[cfg(not(feature = "mmap"))]
+// pub mod parser_new;
 pub mod parser;
 pub mod prim_reader;
 pub mod uint_reader;
-#[cfg(feature = "mmap")]
-pub mod parser_mem;
+// pub mod parser_utility;
 
 pub use self::float_reader::*;
 pub use self::int_reader::*;
 pub use self::macro_src::*;
-#[cfg(not(feature = "mmap"))]
+// pub use self::parser_new::parse_txt;
 pub use self::parser::parse_txt;
 pub use self::prim_reader::*;
 pub use self::uint_reader::*;
-#[cfg(feature = "mmap")]
-pub use self::parser_mem::parse_txt;
 
 //This value is similar in value to the one found in BurntSushi's CSV buffer size
 //Our's is just 4x as large.
@@ -209,7 +207,6 @@ pub fn read_num_file_tot_lines<R: BufRead>(reader: &mut R) -> usize {
             break;
         }
     }
-
     count
 }
 
@@ -270,53 +267,6 @@ pub fn read_num_file_lines<R: BufRead>(reader: & mut R, com: u8) -> usize {
         //If our length is less than our fixed buffer size we've reached the end of our file and can now exit.
         if length < BUF_SIZE {
             break;
-        }
-    }
-    //Finally, we return our line count to the main code.
-    count
-}
-
-///It simply reads all of the lines in the file when an end of line is denoted by \n or \r.
-///A comment character is provided and if it is seen then before any nonwhite space the line is not counted in the total.
-#[cfg(feature = "mmap")]
-pub fn read_num_file_lines_mmap(reader: &[u8], com: u8) -> usize {
-    let mut count = 0;
-    //We're explicitly using the raw bytes here
-    //We're now going to use an explicit loop.
-    //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
-    //to a location of my choosing.
-    let mut i = 0;
-    //We're using the memchr crate to locate all of the most common newline characters
-    //It provides a nice iterator over our buffer that we can now use.
-    let mut newline = memchr2_iter(b'\n', b'\r', reader);
-    //We don't want our loop index to go past our buffer length or else bad things could occur
-    let length = reader.len();
-    //Keeping it old school with some nice wild loops
-    while i < length {
-        //Here's where the main magic occurs
-        //If we come across a space or tab we move to the next item in the buffer
-        //If we come across a newline character we advance our iterator and move onto the
-        //next index essentially
-        //If we come across a comment character first (white spaces aren't counted) we completely skip the line
-        //If we come across any other character first (white spaces aren't counted) we increment our line counter
-        //and then skip the rest of the contents of the line.
-        //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
-        //we can exit the loop.
-        if (reader[i] == b' ') | (reader[i] == b'\t') {
-            i += 1;
-        } else if (reader[i] == b'\n') | (reader[i] == b'\r') | (reader[i] == com) {
-            let val = newline.next();
-            i = match val {
-                Some(val) => val + 1,
-                None => length,
-            };
-        } else {
-            count += 1;
-            let val = newline.next();
-            i = match val {
-                Some(val) => val + 1,
-                None => length,
-            };
         }
     }
     //Finally, we return our line count to the main code.

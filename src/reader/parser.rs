@@ -14,6 +14,11 @@
 //    limitations under the License.
 use super::*;
 use std::io::{BufRead, Seek};
+#[cfg(feature = "mmap")]
+use std::io::{Cursor};
+#[cfg(feature = "mmap")]
+use memmap::MmapOptions;
+
 
 ///parse_txt reads in a data file that is made up any type(s). It parses the data file finding all of the field data and saving off in its raw
 ///byte form. It can fail in a number of other ways related to invalid parameters or the data file having malformed fields. These errors are
@@ -57,8 +62,14 @@ pub fn parse_txt(f: &str, params: &ReaderParams) -> Result<RawReaderResults, Err
         b'\n'
     };
 
+    #[cfg(feature = "mmap")]
+    let buffer = unsafe { MmapOptions::new().map(&file)? };
+
     //We're explicitly using the raw bytes here
+    #[cfg(not(feature = "mmap"))]
     let mut reader = BufReader::with_capacity(BUF_SIZE, file);
+    #[cfg(feature = "mmap")]
+    let mut reader = Cursor::new(&buffer[..]);
 
     //We are finding how many lines in our data file are actually readable and are not commented lines.
     let num_lines = read_num_file_lines(& mut reader, cmt);
