@@ -25,39 +25,77 @@
 #[doc(hidden)]
 macro_rules! load_text_lexical {
     ($f:expr, $params:expr, $type: ident) => {{
-        //Get the raw results
-        let raw_results = parse_txt($f, $params)?;
 
-        //We are initializing our ReaderResult structure
-        let num_items = raw_results.index.len();
+        if $params.row_format {
+            //Get the raw results
+            let raw_results = parse_txt::<RawReaderResultsRows>($f, $params)?;
 
-        let mut results = ReaderResults {
-            num_fields: 0,
-            num_lines: 0,
-            results: Vec::<$type>::with_capacity(num_items + 1),
-        };
+            //We are initializing our ReaderResult structure
+            let num_items = raw_results.index.len();
 
-        results.num_fields = raw_results.num_fields;
-        results.num_lines = raw_results.num_lines;
-        //Converting all of the data over using lexical
-        for i in 0..num_items {
-            let j: usize = {
-                if i == 0 {
-                    0
-                } else {
-                    raw_results.index[i - 1]
-                }
+            let mut results = ReaderResultsRow {
+                num_fields: 0,
+                num_lines: 0,
+                results: Vec::<$type>::with_capacity(num_items + 1),
             };
-            let k: usize = raw_results.index[i];
-            assert!(k <= raw_results.results.len());
-            assert!(j < raw_results.results.len());
-            assert!(j < k);
-            let slice = &raw_results.results[j..k];
-            let temp: $type = lexical::parse::<$type, _>(slice).unwrap();
-            results.results.push(temp);
-        }
 
-        Ok(results)
+            results.num_fields = raw_results.num_fields;
+            results.num_lines = raw_results.num_lines;
+
+            for i in 0..num_items {
+                let j: usize = {
+                    if i == 0 {
+                        0
+                    } else {
+                        raw_results.index[i - 1]
+                    }
+                };
+                let k: usize = raw_results.index[i];
+                assert!(k <= raw_results.results.len());
+                assert!(j < raw_results.results.len());
+                assert!(j < k);
+                let slice = &raw_results.results[j..k];
+                let temp: $type = lexical::parse::<$type, _>(slice).unwrap();
+                results.results.push(temp);
+            }
+            Ok(Box::new(results))
+        }
+        else {
+            //Get the raw results
+            let raw_results = parse_txt::<RawReaderResultsCols>($f, $params)?;
+
+            //We are initializing our ReaderResult structure
+            let num_items = raw_results.num_fields * raw_results.num_lines;
+
+            let mut results = ReaderResultsCol {
+                num_fields: 0,
+                num_lines: 0,
+                results: Vec::<$type>::with_capacity(num_items + 1),
+            };
+
+            results.num_fields = raw_results.num_fields;
+            results.num_lines = raw_results.num_lines;
+
+            for icol in 0..results.num_fields {
+                for i in 0..raw_results.index[icol].len() {
+                    let j: usize = {
+                        if i == 0 {
+                            0
+                        } else {
+                            raw_results.index[icol][i - 1]
+                        }
+                    };
+                    let k: usize = raw_results.index[icol][i];
+                    assert!(k <= raw_results.results[icol].len());
+                    assert!(j < raw_results.results[icol].len());
+                    assert!(j < k);
+                    let slice = &raw_results.results[icol][j..k];
+                    let temp: $type = lexical::parse::<$type, _>(slice).unwrap();
+                    results.results.push(temp);
+                }
+            }
+            Ok(Box::new(results))
+        }
     }};
 }
 
@@ -73,39 +111,78 @@ macro_rules! load_text_lexical {
 #[macro_export]
 macro_rules! load_text {
     ($f:expr, $params:expr, $type: ident) => {{
-        //Get the raw results
-        let raw_results = parse_txt($f, $params)?;
 
-        //We are initializing our ReaderResult structure
-        let num_items = raw_results.index.len();
+        if $params.row_format {
+            //Get the raw results
+            let raw_results = parse_txt::<RawReaderResultsRows>($f, $params)?;
 
-        let mut results = ReaderResults {
-            num_fields: 0,
-            num_lines: 0,
-            results: Vec::<$type>::with_capacity(num_items + 1),
-        };
+            //We are initializing our ReaderResult structure
+            let num_items = raw_results.index.len();
 
-        results.num_fields = raw_results.num_fields;
-        results.num_lines = raw_results.num_lines;
-
-        for i in 0..num_items {
-            let j: usize = {
-                if i == 0 {
-                    0
-                } else {
-                    raw_results.index[i - 1]
-                }
+            let mut results = ReaderResultsRow {
+                num_fields: 0,
+                num_lines: 0,
+                results: Vec::<$type>::with_capacity(num_items + 1),
             };
-            let k: usize = raw_results.index[i];
-            assert!(k <= raw_results.results.len());
-            assert!(j < raw_results.results.len());
-            assert!(j < k);
-            let slice = &raw_results.results[j..k];
-            let temp_str = str::from_utf8(slice)?;
-            let temp = $type::from_str(&temp_str)?;
-            results.results.push(temp);
-        }
 
-        Ok(results)
+            results.num_fields = raw_results.num_fields;
+            results.num_lines = raw_results.num_lines;
+
+            for i in 0..num_items {
+                let j: usize = {
+                    if i == 0 {
+                        0
+                    } else {
+                        raw_results.index[i - 1]
+                    }
+                };
+                let k: usize = raw_results.index[i];
+                assert!(k <= raw_results.results.len());
+                assert!(j < raw_results.results.len());
+                assert!(j < k);
+                let slice = &raw_results.results[j..k];
+                let temp_str = str::from_utf8(slice)?;
+                let temp = $type::from_str(&temp_str)?;
+                results.results.push(temp);
+            }
+            Ok(Box::new(results))
+        }
+        else {
+            //Get the raw results
+            let raw_results = parse_txt::<RawReaderResultsCols>($f, $params)?;
+
+            //We are initializing our ReaderResult structure
+            let num_items = raw_results.num_fields * raw_results.num_lines;
+
+            let mut results = ReaderResultsCol {
+                num_fields: 0,
+                num_lines: 0,
+                results: Vec::<$type>::with_capacity(num_items + 1),
+            };
+
+            results.num_fields = raw_results.num_fields;
+            results.num_lines = raw_results.num_lines;
+
+            for icol in 0..results.num_fields {
+                for i in 0..raw_results.index[icol].len() {
+                    let j: usize = {
+                        if i == 0 {
+                            0
+                        } else {
+                            raw_results.index[icol][i - 1]
+                        }
+                    };
+                    let k: usize = raw_results.index[icol][i];
+                    assert!(k <= raw_results.results[icol].len());
+                    assert!(j < raw_results.results[icol].len());
+                    assert!(j < k);
+                    let slice = &raw_results.results[icol][j..k];
+                    let temp_str = str::from_utf8(slice)?;
+                    let temp = $type::from_str(&temp_str)?;
+                    results.results.push(temp);
+                }
+            }
+            Ok(Box::new(results))
+        }
     }};
 }

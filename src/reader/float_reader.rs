@@ -29,7 +29,7 @@ use super::*;
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>, Error> {
+pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<f32>>, Error> {
     load_text_lexical!(f, params, f32)
 }
 
@@ -49,6 +49,6 @@ pub fn load_txt_f32(f: &str, params: &ReaderParams) -> Result<ReaderResults<f32>
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
 
-pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<ReaderResults<f64>, Error> {
+pub fn load_txt_f64(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<f64>>, Error> {
     load_text_lexical!(f, params, f64)
 }

@@ -29,7 +29,7 @@ use super::*;
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_string(f: &str, params: &ReaderParams) -> Result<ReaderResults<String>, Error> {
+pub fn load_txt_string(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<String>>, Error> {
     load_text!(f, params, String)
 }
 
@@ -50,7 +50,7 @@ pub fn load_txt_string(f: &str, params: &ReaderParams) -> Result<ReaderResults<S
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_bool(f: &str, params: &ReaderParams) -> Result<ReaderResults<bool>, Error> {
+pub fn load_txt_bool(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<bool>>, Error> {
     load_text!(f, params, bool)
 }
 
@@ -71,6 +71,6 @@ pub fn load_txt_bool(f: &str, params: &ReaderParams) -> Result<ReaderResults<boo
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_char(f: &str, params: &ReaderParams) -> Result<ReaderResults<char>, Error> {
+pub fn load_txt_char(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<char>>, Error> {
     load_text!(f, params, char)
 }

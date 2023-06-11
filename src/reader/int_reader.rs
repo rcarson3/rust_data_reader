@@ -29,7 +29,7 @@ use super::*;
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<ReaderResults<i8>, Error> {
+pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<i8>>, Error> {
     load_text_lexical!(f, params, i8)
 }
 
@@ -48,7 +48,7 @@ pub fn load_txt_i8(f: &str, params: &ReaderParams) -> Result<ReaderResults<i8>, 
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_i16(f: &str, params: &ReaderParams) -> Result<ReaderResults<i16>, Error> {
+pub fn load_txt_i16(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<i16>>, Error> {
     load_text_lexical!(f, params, i16)
 }
 
@@ -67,7 +67,7 @@ pub fn load_txt_i16(f: &str, params: &ReaderParams) -> Result<ReaderResults<i16>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>, Error> {
+pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<i32>>, Error> {
     load_text_lexical!(f, params, i32)
 }
 
@@ -86,7 +86,7 @@ pub fn load_txt_i32(f: &str, params: &ReaderParams) -> Result<ReaderResults<i32>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_i64(f: &str, params: &ReaderParams) -> Result<ReaderResults<i64>, Error> {
+pub fn load_txt_i64(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<i64>>, Error> {
     load_text_lexical!(f, params, i64)
 }
 
@@ -105,6 +105,6 @@ pub fn load_txt_i64(f: &str, params: &ReaderParams) -> Result<ReaderResults<i64>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_i128(f: &str, params: &ReaderParams) -> Result<ReaderResults<i128>, Error> {
+pub fn load_txt_i128(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<i128>>, Error> {
     load_text_lexical!(f, params, i128)
 }

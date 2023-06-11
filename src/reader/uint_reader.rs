@@ -29,7 +29,7 @@ use super::*;
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, Error> {
+pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<u8>>, Error> {
     load_text_lexical!(f, params, u8)
 }
 
@@ -48,7 +48,7 @@ pub fn load_txt_u8(f: &str, params: &ReaderParams) -> Result<ReaderResults<u8>, 
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>, Error> {
+pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<u16>>, Error> {
     load_text_lexical!(f, params, u16)
 }
 
@@ -67,7 +67,7 @@ pub fn load_txt_u16(f: &str, params: &ReaderParams) -> Result<ReaderResults<u16>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>, Error> {
+pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<u32>>, Error> {
     load_text_lexical!(f, params, u32)
 }
 
@@ -86,7 +86,7 @@ pub fn load_txt_u32(f: &str, params: &ReaderParams) -> Result<ReaderResults<u32>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>, Error> {
+pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<u64>>, Error> {
     load_text_lexical!(f, params, u64)
 }
 
@@ -105,7 +105,7 @@ pub fn load_txt_u64(f: &str, params: &ReaderParams) -> Result<ReaderResults<u64>
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u128>, Error> {
+pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<u128>>, Error> {
     load_text_lexical!(f, params, u128)
 }
 
@@ -125,6 +125,6 @@ pub fn load_txt_u128(f: &str, params: &ReaderParams) -> Result<ReaderResults<u12
 ///Output -
 ///
 /// A Result type that either contains a ReaderResults structure or an error.
-pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<ReaderResults<usize>, Error> {
+pub fn load_txt_usize(f: &str, params: &ReaderParams) -> Result<Box<dyn ReaderResults<usize>>, Error> {
     load_text_lexical!(f, params, usize)
 }

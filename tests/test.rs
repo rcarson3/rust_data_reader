@@ -56,12 +56,13 @@ fn load_txt_i32_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -81,7 +82,7 @@ fn load_txt_i32_reader_params_constructor_test() {
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -98,7 +99,7 @@ fn load_txt_i32_reader_params_default_test() {
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -128,7 +129,7 @@ fn load_txt_i32_test_sk_f() {
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     );
 }
@@ -144,12 +145,13 @@ fn load_txt_i32_test_sk_h() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
     );
 }
@@ -165,12 +167,13 @@ fn load_txt_i32_test_mrows() {
         skip_footer: None,
         usecols: None,
         max_rows: Some(8),
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
     );
 }
@@ -186,6 +189,7 @@ fn load_txt_i32_test_sk_f_big() {
         skip_footer: Some(11),
         usecols: None,
         max_rows: Some(8),
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
@@ -206,17 +210,18 @@ fn load_txt_i32_test_u_cols() {
         skip_footer: None,
         usecols: Some(cols),
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     let results = results.unwrap();
 
-    assert_eq!(results.results, vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]);
+    assert_eq!(*results.get_results(), vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]);
 
-    assert_eq!(results.num_fields, 1);
+    assert_eq!(results.get_num_fields(), 1);
 
-    assert_eq!(results.num_lines, 10);
+    assert_eq!(results.get_num_lines(), 10);
 }
 
 #[test]
@@ -233,12 +238,13 @@ fn load_txt_i32_test_u_cols_at_bnds() {
         skip_footer: None,
         usecols: Some(cols),
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
     );
 }
@@ -257,12 +263,13 @@ fn load_txt_i32_test_u_cols_out_bnds() {
         skip_footer: None,
         usecols: Some(cols),
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![3, 6, 9, 12, 15, 18, 21, 24, 27, 30]
     );
 }
@@ -279,12 +286,13 @@ fn load_txt_i32_test2() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 19, 20, 21, 25, 26, 27, 28, 29, 30]
     );
 }
@@ -303,12 +311,13 @@ fn load_txt_i32_test3() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 19, 20, 21, 25, 26, 27, 28, 29, 30]
     );
 }
@@ -325,12 +334,13 @@ fn load_txt_i8_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i8(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -350,12 +360,13 @@ fn load_txt_i16_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i16(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -375,15 +386,69 @@ fn load_txt_i64_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
+        ]
+    );
+}
+
+//The test file for this has 0 commented lines in it
+#[test]
+fn load_txt_i64_test_cols() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: None,
+        max_rows: None,
+        row_format: false,
+    };
+
+    let results = load_txt_i64(&file, &params);
+
+    assert_eq!(
+        *results.unwrap().get_results(),
+        vec![
+            1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 
+            2, 5, 8, 11, 14, 17, 20, 23, 26, 29,
+            3, 6, 9, 12, 15, 18, 21, 24, 27, 30
+        ]
+    );
+}
+
+//The test file for this has 0 commented lines in it
+#[test]
+fn load_txt_i64_test_cols_skc() {
+    let file = String::from("int_testv2.txt");
+
+    let params = ReaderParams {
+        comments: Some(b'%'),
+        delimiter: Delimiter::WhiteSpace,
+        skip_header: None,
+        skip_footer: None,
+        usecols: Some(vec![0,2]),
+        max_rows: None,
+        row_format: false,
+    };
+
+    let results = load_txt_i64(&file, &params);
+
+    assert_eq!(
+        *results.unwrap().get_results(),
+        vec![
+            1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 
+            3, 6, 9, 12, 15, 18, 21, 24, 27, 30
         ]
     );
 }
@@ -400,12 +465,13 @@ fn load_txt_u8_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_u8(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -425,12 +491,13 @@ fn load_txt_usize_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_usize(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -450,12 +517,13 @@ fn load_txt_usize_no_cmt_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_usize(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, 26, 27, 28, 29, 30
@@ -475,12 +543,13 @@ fn load_txt_f32_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_f32(&file, &params);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
             17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0
@@ -501,6 +570,7 @@ fn load_txt_f32_sci_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let params_ref = &params;
@@ -508,7 +578,7 @@ fn load_txt_f32_sci_test() {
     let results = load_txt_f32(file_ref, params_ref);
 
     assert_eq!(
-        results.unwrap().results,
+        *results.unwrap().get_results(),
         vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0,
             17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0
@@ -528,6 +598,7 @@ fn load_txt_f64_sci_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let params_ref = &params;
@@ -546,7 +617,8 @@ fn load_txt_f64_sci_test() {
         -2.229083163749999985e-01,
     ];
 
-    let comp = &results.unwrap().results;
+    let results_tmp = results.unwrap();
+    let comp = results_tmp.get_results();
     let len = comp.len();
     let slice = &comp[(len - 9)..len];
 
@@ -565,6 +637,7 @@ fn load_txt_string_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_string(&file, &params);
@@ -576,7 +649,7 @@ fn load_txt_string_test() {
 
     let string_vec: Vec<String> = r_int.iter().map(|x| x.to_string()).collect();
 
-    assert_eq!(results.unwrap().results, string_vec);
+    assert_eq!(*results.unwrap().get_results(), string_vec);
 }
 
 #[test]
@@ -590,6 +663,7 @@ fn load_txt_bool_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_bool(&file, &params);
@@ -599,7 +673,7 @@ fn load_txt_bool_test() {
         true, true, false, true,
     ];
 
-    assert_eq!(results.unwrap().results, b_vec);
+    assert_eq!(*results.unwrap().get_results(), b_vec);
 }
 
 #[test]
@@ -613,6 +687,7 @@ fn load_txt_char_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_char(&file, &params);
@@ -622,7 +697,7 @@ fn load_txt_char_test() {
         's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'a',
     ];
 
-    assert_eq!(results.unwrap().results, c_vec);
+    assert_eq!(*results.unwrap().get_results(), c_vec);
 }
 
 //Everything needed for our custom type
@@ -652,14 +727,15 @@ fn load_txt_custom_test() -> Result<(), anyhow::Error> {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let ref_file = &file;
     let ref_params = &params;
 
-    let results: Result<ReaderResults<MinInt>, Error> = load_text!(ref_file, ref_params, MinInt);
+    let results: Result<Box<dyn ReaderResults<MinInt>>, Error> = load_text!(ref_file, ref_params, MinInt);
 
-    let temp = results.unwrap().results.clone();
+    let temp = results.unwrap().get_results().clone();
 
     let vals: Vec<i32> = temp.iter().map(|x| x.x).collect();
 
@@ -685,6 +761,7 @@ fn get_value_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -704,6 +781,7 @@ fn get_value_test_fail() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -722,6 +800,7 @@ fn get_row_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -741,6 +820,7 @@ fn get_row_test_fail() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -759,6 +839,7 @@ fn get_rows_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -782,6 +863,7 @@ fn get_rows_test_fail() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -801,6 +883,7 @@ fn get_col_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -823,6 +906,7 @@ fn get_col_test_fail() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -841,6 +925,7 @@ fn get_cols_test() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();
@@ -867,6 +952,7 @@ fn get_cols_test_fail() {
         skip_footer: None,
         usecols: None,
         max_rows: None,
+        ..Default::default()
     };
 
     let results = load_txt_i64(&file, &params).unwrap();

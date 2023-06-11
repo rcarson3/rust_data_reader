@@ -13,629 +13,287 @@
 //    See the License for the specific language governing permissions and
 //    limitations under the License.
 
+use memchr::memchr2_iter;
+use std::io::{BufRead};
+
 use super::*;
 
-use memchr::Memchr2;
-
-pub(crate) trait ReadCore: std::io::Read + std::io::BufRead + std::io::Seek {}
-impl<T: std::io::Read + std::io::BufRead + std::io::Seek> ReadCore for T {}
-
-pub(crate) struct CoreData<'a> {
-    pub length: usize,
-    pub offset: usize,
-    pub cmt: u8,
-    pub delim_ws: bool,
-    pub delim: u8,
-    pub fln: usize,
-    pub cols: &'a mut Vec::<usize>,
-    pub field_counter: usize,
-    pub tot_fields: usize,
-    pub results: &'a mut RawReaderResults,
+///A private function that counts the number of lines that match a specified character specified to it.
+///It is assumed that this character only appears once per line.
+fn count_lines(buf: &[u8], eol: u8) -> usize {
+    bytecount::count(buf, eol) as usize
 }
 
-pub(crate) trait Parser {
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error>;
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error>;
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error>;
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error>;
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error>;
-    fn parse_others(&self, buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error>;
+/// It simply reads all of the lines in the file when an end of line is denoted by \n.
+/// It does not take into account whether any line is a comment or not.
+pub fn read_num_file_tot_lines<R: BufRead>(reader: &mut R) -> usize {
+    let mut count = 0;
+    loop {
+        let buffer = reader.fill_buf().unwrap();
+        let length = buffer.len();
+        count += count_lines(&buffer[0..length], b'\n');
+        //We now need to consume everything in our buffer, so it's marked off as no longer being needed
+        reader.consume(length);
+        if length < BUF_SIZE {
+            break;
+        }
+    }
+    count
 }
 
-pub(crate) struct NwLine {}
-pub(crate) struct Delim {}
-pub(crate) struct Space {}
-pub(crate) struct Field {}
-pub(crate) struct SkField {}
-
-pub(crate) enum ParserState {
-    NwLine(NwLine),
-    Delim(Delim),
-    Space(Space),
-    Field(Field),
-    SkField(SkField),
-}
-
-impl ParserState {
-    #[inline(always)]
-    pub(crate) fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        match self {
-            ParserState::NwLine(ps) => ps.next(buffer, newline, core_data),
-            ParserState::Delim(ps) => ps.next(buffer, newline, core_data),
-            ParserState::Space(ps) => ps.next(buffer, newline, core_data),
-            ParserState::Field(ps) => ps.next(buffer, newline, core_data),
-            ParserState::SkField(ps) => ps.next(buffer, newline, core_data),
-        }
-    }    
-}
-
-impl Parser for NwLine {
-    #[inline(always)]
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let buf_val = buffer[core_data.offset];
-        if (buf_val == core_data.delim) & !core_data.delim_ws
-        {
-            return self.parse_delim(core_data);
-        }
-        else if (buf_val == b' ') | (buf_val == b'\t') {
-            return self.parse_whitespace(core_data);
-        }
-        else if (buf_val == b'\n') | (buf_val == b'\r') | (buf_val == core_data.cmt) {
-            return self.parse_newline(newline, core_data);
-        } else {
-            return self.parse_others(buf_val, core_data);
-        }
-    }
-
-    #[inline(always)]
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.field_counter = 1;
-        core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
-    }
-
-    #[inline(always)]
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        if core_data.delim_ws {
-            core_data.field_counter = 1;
-            core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
-        }
-        else {
-            core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
-        }
-    }
-
-    #[inline(always)]
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        return self.parse_newline(newline, core_data);
-    }
-
-    #[inline(always)]
-    fn parse_others(&self, buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.field_counter = 1;
-        core_data.offset += 1;
-        match &core_data.cols.len() {
-            0 => {
-                core_data.results.results.push(buf_val);
-                return Ok(ParserState::Field(Field{}));
-            }
-            _ => {
-                let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
-                match pos {
-                    Some(_x) => {
-                        core_data.results.results.push(buf_val);
-                        return Ok(ParserState::Field(Field{}));
-                    }
-                    None => {
-                        return Ok(ParserState::SkField(SkField{}));
-                    }
+///It simply reads all of the lines in the file when an end of line is denoted by \n or \r.
+///A comment character is provided and if it is seen then before any nonwhite space the line is not counted in the total.
+pub fn read_num_file_lines<R: BufRead>(reader: & mut R, com: u8) -> usize {
+    let mut count = 0;
+    //We're explicitly using the raw bytes here
+    // let mut reader = BufReader::with_capacity(BUF_SIZE, f);
+    //We loop over until the file has been completely read
+    loop {
+        //We first find the length of our buffer
+        let length = {
+            //We fill the buffer up. Our buffer is mutable which is why it's in this block
+            let buffer = reader.fill_buf().unwrap();
+            //We're now going to use an explicit loop.
+            //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
+            //to a location of my choosing.
+            let mut i = 0;
+            //We're using the memchr crate to locate all of the most common newline characters
+            //It provides a nice iterator over our buffer that we can now use.
+            let mut newline = memchr2_iter(b'\n', b'\r', buffer);
+            //We don't want our loop index to go past our buffer length or else bad things could occur
+            let length = buffer.len();
+            //Keeping it old school with some nice wild loops
+            while i < length {
+                //Here's where the main magic occurs
+                //If we come across a space or tab we move to the next item in the buffer
+                //If we come across a newline character we advance our iterator and move onto the
+                //next index essentially
+                //If we come across a comment character first (white spaces aren't counted) we completely skip the line
+                //If we come across any other character first (white spaces aren't counted) we increment our line counter
+                //and then skip the rest of the contents of the line.
+                //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
+                //we can exit the loop.
+                if (buffer[i] == b' ') | (buffer[i] == b'\t') {
+                    i += 1;
+                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') | (buffer[i] == com) {
+                    let val = newline.next();
+                    i = match val {
+                        Some(val) => val + 1,
+                        None => length,
+                    };
+                } else {
+                    count += 1;
+                    let val = newline.next();
+                    i = match val {
+                        Some(val) => val + 1,
+                        None => length,
+                    };
                 }
             }
+            //Pass off our length to set our length outside of this block of code
+            length
+        };
+        //We now need to consume everything in our buffer, so it's marked off as no longer being needed
+        reader.consume(length);
+        //If our length is less than our fixed buffer size we've reached the end of our file and can now exit.
+        if length < BUF_SIZE {
+            break;
         }
     }
+    //Finally, we return our line count to the main code.
+    count
 }
 
-impl Parser for Delim {
-    #[inline(always)]
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let buf_val = buffer[core_data.offset];
-        if (buf_val == core_data.delim) & !core_data.delim_ws
-        {
-            return self.parse_delim(core_data);
-        }
-        else if (buf_val == b' ') | (buf_val == b'\t') {
-            return self.parse_whitespace(core_data);
-        }
-        else if (buf_val == b'\n') | (buf_val == b'\r') {
-            return self.parse_newline(newline, core_data);
-        } 
-        else if buf_val == core_data.cmt {
-            return self.parse_comment(newline, core_data);
-        }
-        else {
-            return self.parse_others(buf_val, core_data);
-        }
-    }
+pub fn skip_header_lines<R: BufRead>(reader: & mut R, fln: &mut usize, cmt: u8, sk_h: usize) {
+    //If we skip any header lines then we need to skip forward through the file by
+    //the correct number of lines when not taking into account commented lines.
+    if sk_h > 0 {
+        let mut count = 0;
 
-    #[inline(always)]
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
-    }
-
-    #[inline(always)]
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        if core_data.delim_ws {
-            core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
-        }
-        else {
-            core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
-        }
-    }
-
-    #[inline(always)]
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-    
-        if core_data.delim_ws {
-            core_data.field_counter -= 1;
-            if core_data.results.num_lines == 0 {
-                core_data.tot_fields = core_data.field_counter;
-                core_data.results.num_fields = if !core_data.cols.is_empty() {
-                    if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
+        //We loop over until we've skipped over the desired number of lines
+        loop {
+            //We first find the length of our buffer
+            let length = {
+                //We fill the buffer up. Our buffer is mutable which is why it's in this block
+                let buffer = reader.fill_buf().unwrap();
+                //We're now going to use an explicit loop.
+                //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
+                //to a location of my choosing.
+                let mut i = 0;
+                //We're using the memchr crate to locate all of the most common newline characters
+                //It provides a nice iterator over our buffer that we can now use.
+                let mut newline = memchr2_iter(b'\n', b'\r', buffer);
+                //We don't want our loop index to go past our buffer length or else bad things could occur
+                let length = buffer.len();
+                //Keeping it old school with some nice wild loops
+                while i < length {
+                    //Here's where the main magic occurs
+                    //If we come across a space or tab we move to the next item in the buffer
+                    //If we come across a newline character we advance our iterator and move onto the
+                    //next index essentially
+                    //If we come across a comment character first (white spaces aren't counted) we completely skip the line
+                    //If we come across any other character first (white spaces aren't counted) we increment our line counter
+                    //and then skip the rest of the contents of the line.
+                    //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
+                    //we can exit the loop.
+                    if (buffer[i] == b' ') | (buffer[i] == b'\t') {
+                        i += 1;
+                    } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') | (buffer[i] == cmt) {
+                        let val = newline.next();
+                        i = match val {
+                            Some(val) => val + 1,
+                            None => length + 1,
+                        };
+                        *fln += 1;
                     } else {
-                        core_data.cols.len()
+                        count += 1;
+                        let val = newline.next();
+                        i = match val {
+                            Some(val) => val + 1,
+                            None => length + 1,
+                        };
+                        *fln += 1;
                     }
-                } else {
-                    core_data.field_counter
-                };
+                    //Here we're checking to see if we've reached the number of lines to skip or not
+                    if count == sk_h {
+                        break;
+                    }
+                }
+                //Pass off our length to set our length outside of this block of code
+                i - 1
+            };
+            //We now need to consume everything upto "length" in our buffer, so it's marked off as no longer being needed
+            reader.consume(length);
+            //If we've skipped over the desired number of lines we can exit the loop.
+            if count == sk_h || length < BUF_SIZE {
+                break;
             }
-            if (core_data.field_counter != core_data.tot_fields) & (core_data.field_counter != 0) {
-                return Err(format_err!(
-                    "Newline (delim) Number of fields,{}, provided at line {} 
-                    is different than the initial field number of {}",
-                    core_data.field_counter,
-                    core_data.fln,
-                    core_data.tot_fields
-                ));
-            }
-            core_data.field_counter = 0;
-            core_data.results.num_lines += 1;
-        } else {
-            return Err(format_err!(
-                "Number of fields provided at line {} 
-                ends with a delimiter instead of a field or white space",
-                core_data.fln
-            ));
         }
-        return Ok(ParserState::NwLine(NwLine{}));
     }
+}
 
-    #[inline(always)]
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
+pub fn count_num_fields<R: BufRead>(reader:&mut R, cmt: u8, delim: u8, delim_ws: bool) -> usize {
+    let mut field_counter = 0;
 
-        if core_data.delim_ws {
-            core_data.field_counter -= 1;
-            if (core_data.results.num_lines == 0) & (core_data.field_counter != 0) {
-                core_data.tot_fields = core_data.field_counter;
-                core_data.results.num_fields = if !core_data.cols.is_empty() {
-                    if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                        return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
+    enum ParseState {CmtNwLine, Field, Space, Delim}
+
+    let mut state = ParseState::CmtNwLine;
+
+    //We loop over until we've skipped over the desired number of lines
+    loop {
+        //We first find the length of our buffer
+        let length = {
+            //We fill the buffer up. Our buffer is mutable which is why it's in this block
+            let buffer = reader.fill_buf().unwrap();
+            //We're now going to use an explicit loop.
+            //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
+            //to a location of my choosing.
+            let mut i = 0;
+            //We're using the memchr crate to locate all of the most common newline characters
+            //It provides a nice iterator over our buffer that we can now use.
+            let mut newline = memchr2_iter(b'\n', b'\r', buffer);
+            //We don't want our loop index to go past our buffer length or else bad things could occur
+            let length = buffer.len();
+            //Keeping it old school with some nice wild loops
+            while i < length {
+                //Here's where the main magic occurs
+                //If we come across a space or tab we move to the next item in the buffer
+                //If we come across a newline character we advance our iterator and move onto the
+                //next index essentially
+                //If we come across a comment character first (white spaces aren't counted) we completely skip the line
+                //If we come across any other character first (white spaces aren't counted) we increment our line counter
+                //and then skip the rest of the contents of the line.
+                //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
+                //we can exit the loop.
+                if (buffer[i] == delim) & !delim_ws {
+                    state = match state {
+                        ParseState::CmtNwLine => {
+                            field_counter = 1;
+                            ParseState::Delim
+                        }
+                        ParseState::Delim => ParseState::Delim,
+                        ParseState::Field => {
+                            field_counter += 1;
+                            ParseState::Delim
+                        }
+                        ParseState::Space => {
+                            field_counter += 1;
+                            ParseState::Delim
+                        }
+                    };
+                    i += 1;
+                }
+                else if (buffer[i] == b' ') | (buffer[i] == b'\t') {
+                    if delim_ws {
+                        state = match state {
+                            ParseState::CmtNwLine => {
+                                field_counter = 1;
+                                ParseState::Delim
+                            }
+                            ParseState::Delim => ParseState::Delim,
+                            ParseState::Field => {
+                                field_counter += 1;
+                                ParseState::Delim
+                            }
+                            ParseState::Space => {
+                                field_counter += 1;
+                                ParseState::Delim
+                            }
+                        };
                     } else {
-                        core_data.cols.len()
+                        state = match state {
+                            ParseState::CmtNwLine => ParseState::Space,
+                            ParseState::Delim => ParseState::Space,
+                            ParseState::Field => ParseState::Field,
+                            ParseState::Space => ParseState::Space,
+                        };
                     }
-                } else {
-                    core_data.field_counter
-                };
-            }
-            if (core_data.field_counter != core_data.tot_fields) & (core_data.field_counter != 0) {
-                return Err(format_err!(
-                    "Cmt (delim) Number of fields,{}, provided at line {} 
-                    is different than the initial field number of {}",
-                    core_data.field_counter,
-                    core_data.fln,
-                    core_data.tot_fields
-                ));
-            }
-            if core_data.field_counter > 0 {
-                core_data.field_counter = 0;
-                core_data.results.num_lines += 1;
-            }
-        } else {
-            return Err(format_err!(
-                "Number of fields provided at line {} 
-                ends with a delimiter instead of a field or white space",
-                core_data.fln
-            ));
-        }
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_others(&self, buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.offset += 1;
-        match &core_data.cols.len() {
-            0 => {
-                core_data.results.results.push(buf_val);
-                return Ok(ParserState::Field(Field{}));
-            }
-            _ => {
-                let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
-                match pos {
-                    Some(_x) => {
-                        core_data.results.results.push(buf_val);
-                        return Ok(ParserState::Field(Field{}));
+                    i += 1;
+                } 
+                else if (buffer[i] == b'\n') | (buffer[i] == b'\r') | (buffer[i] == cmt) {
+                    if field_counter == 0 {
+                        let val = newline.next();
+                        i = match val {
+                            Some(val) => val + 1,
+                            None => length + 1,
+                        };
                     }
-                    None => {
-                        return Ok(ParserState::SkField(SkField{}));
+                    else {
+                        match state {
+                            ParseState::Delim => field_counter -= 1,
+                            _ => (),
+                        }
+                        return field_counter;
                     }
                 }
+                else {
+                    state = match state {
+                        ParseState::CmtNwLine => {
+                            field_counter = 1;
+                            ParseState::Field
+                        }
+                        ParseState::Delim => ParseState::Field,
+                        ParseState::Field => ParseState::Field,
+                        ParseState::Space => {
+                            if field_counter == 0 {
+                                field_counter += 1;
+                            }
+                            ParseState::Field
+                        }
+                    };
+                    i += 1;
+                }
             }
+            //Pass off our length to set our length outside of this block of code
+            i - 1
+        };
+        //We now need to consume everything upto "length" in our buffer, so it's marked off as no longer being needed
+        reader.consume(length);
+        //If we've skipped over the desired number of lines we can exit the loop.
+        if length < BUF_SIZE {
+            break;
         }
     }
+
+    field_counter
 }
-
-impl Parser for Space {
-    #[inline(always)]
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let buf_val = buffer[core_data.offset];
-        if (buf_val == core_data.delim) & !core_data.delim_ws
-        {
-            return self.parse_delim(core_data);
-        }
-        else if (buf_val == b' ') | (buf_val == b'\t') {
-            return self.parse_whitespace(core_data);
-        }
-        else if (buf_val == b'\n') | (buf_val == b'\r') {
-            return self.parse_newline(newline, core_data);
-        } 
-        else if buf_val == core_data.cmt {
-            return self.parse_comment(newline, core_data);
-        }
-        else {
-            return self.parse_others(buf_val, core_data);
-        }
-    }
-
-    #[inline(always)]
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.field_counter += 1;
-        core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
-    }
-
-    #[inline(always)]
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        if core_data.delim_ws {
-            core_data.field_counter += 1;
-            core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
-        }
-        else {
-            core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
-        }
-    }
-
-    #[inline(always)]
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_others(&self, buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.offset += 1;
-        //The case where we start out with spaces before our 1st field at the start of a line
-        if core_data.field_counter == 0 {
-            core_data.field_counter += 1;
-        }
-        match &core_data.cols.len() {
-            0 => {
-                core_data.results.results.push(buf_val);
-                return Ok(ParserState::Field(Field{}));
-            }
-            _ => {
-                let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
-                match pos {
-                    Some(_x) => {
-                        core_data.results.results.push(buf_val);
-                        return Ok(ParserState::Field(Field{}));
-                    }
-                    None => {
-                        return Ok(ParserState::SkField(SkField{}));
-                    }
-                }
-            }
-        }
-    }
-}
-
-impl Parser for Field {
-    #[inline(always)]
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let buf_val = buffer[core_data.offset];
-        if (buf_val == core_data.delim) & !core_data.delim_ws
-        {
-            return self.parse_delim(core_data);
-        }
-        else if (buf_val == b' ') | (buf_val == b'\t') {
-            return self.parse_whitespace(core_data);
-        }
-        else if (buf_val == b'\n') | (buf_val == b'\r') {
-            return self.parse_newline(newline, core_data);
-        } 
-        else if buf_val == core_data.cmt {
-            return self.parse_comment(newline, core_data);
-        }
-        else {
-            return self.parse_others(buf_val, core_data);
-        }
-    }
-
-    #[inline(always)]
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.field_counter += 1;
-        core_data.offset += 1;
-        core_data.results.index.push(core_data.results.results.len());
-        return Ok(ParserState::Delim(Delim{}));
-    }
-
-    #[inline(always)]
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        if core_data.delim_ws {
-            core_data.field_counter += 1;
-            core_data.results.index.push(core_data.results.results.len());
-            core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
-        }
-        else {
-            core_data.offset += 1;
-            return Ok(ParserState::Field(Field{}));
-        }
-    }
-
-    #[inline(always)]
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-
-        core_data.results.index.push(core_data.results.results.len());
-        if core_data.results.num_lines == 0 {
-            core_data.tot_fields = core_data.field_counter;
-            core_data.results.num_fields = if !core_data.cols.is_empty() {
-                if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                    return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
-                } else {
-                    core_data.cols.len()
-                }
-            } else {
-                core_data.field_counter
-            };
-        }
-        if core_data.field_counter != core_data.tot_fields {
-            return Err(format_err!(
-                "Newline (field) Number of fields,{}, provided at line {} 
-                is different than the initial field number of {}",
-                core_data.field_counter,
-                core_data.fln,
-                core_data.tot_fields
-            ));
-        }
-        core_data.results.num_lines += 1;
-        core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-
-        if core_data.results.num_lines == 0 {
-            core_data.tot_fields = core_data.field_counter;
-            core_data.results.num_fields = if !core_data.cols.is_empty() {
-                if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                    return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
-                } else {
-                    core_data.cols.len()
-                }
-            } else {
-                core_data.field_counter
-            };
-        }
-        core_data.results.index.push(core_data.results.results.len());
-        if core_data.field_counter != core_data.tot_fields {
-            return Err(format_err!(
-                "Cmt (field) Number of fields,{}, provided at line {} 
-                is different than the initial field number of {}",
-                core_data.field_counter,
-                core_data.fln,
-                core_data.tot_fields
-            ));
-        }
-        core_data.results.num_lines += 1;
-        core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_others(&self, buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.offset += 1;
-        core_data.results.results.push(buf_val);
-        return Ok(ParserState::Field(Field{}));
-    }
-
-
-}
-
-impl Parser for SkField {
-    #[inline(always)]
-    fn next(&self, buffer: &[u8], newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let buf_val = buffer[core_data.offset];
-        if (buf_val == core_data.delim) & !core_data.delim_ws
-        {
-            return self.parse_delim(core_data);
-        }
-        else if (buf_val == b' ') | (buf_val == b'\t') {
-            return self.parse_whitespace(core_data);
-        }
-        else if (buf_val == b'\n') | (buf_val == b'\r') {
-            return self.parse_newline(newline, core_data);
-        } 
-        else if buf_val == core_data.cmt {
-            return self.parse_comment(newline, core_data);
-        }
-        else {
-            return self.parse_others(buf_val, core_data);
-        }
-    }
-
-    #[inline(always)]
-    fn parse_delim(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.field_counter += 1;
-        core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
-    }
-
-    #[inline(always)]
-    fn parse_whitespace(&self, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        if core_data.delim_ws {
-            core_data.offset += 1;
-            core_data.field_counter += 1;
-            return Ok(ParserState::Delim(Delim{}));
-        }
-        else {
-            core_data.offset += 1;
-            return Ok(ParserState::SkField(SkField{}));
-        }
-    }
-
-    #[inline(always)]
-    fn parse_newline(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-    
-        if core_data.results.num_lines == 0 {
-            core_data.tot_fields = core_data.field_counter;
-            core_data.results.num_fields = if !core_data.cols.is_empty() {
-                if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                    return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
-                } else {
-                    core_data.cols.len()
-                }
-            } else {
-                core_data.field_counter
-            };
-        }
-        if core_data.field_counter != core_data.tot_fields {
-            return Err(format_err!(
-                "Newline (skip field) Number of fields,{}, provided at line {} 
-                is different than the initial field number of {}",
-                core_data.field_counter,
-                core_data.fln,
-                core_data.tot_fields
-            ));
-        }
-        core_data.results.num_lines += 1;
-        core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_comment(&self, newline: &mut Memchr2, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        let val = newline.next();
-        core_data.offset = match val {
-            Some(val) => val + 1,
-            None => core_data.length,
-        };
-        core_data.fln += 1;
-
-        if core_data.results.num_lines == 0 {
-            core_data.tot_fields = core_data.field_counter;
-            core_data.results.num_fields = if !core_data.cols.is_empty() {
-                if core_data.cols.iter().any(|&x| x > core_data.field_counter) {
-                    return Err(format_err!("Input for usecols contains a value greater than or equal to the number of fields {}", core_data.field_counter));
-                } else {
-                    core_data.cols.len()
-                }
-            } else {
-                core_data.field_counter
-            };
-        }
-        if core_data.field_counter != core_data.tot_fields {
-            return Err(format_err!(
-                "Cmt (skip field) Number of fields,{}, provided at line {} 
-                is different than the initial field number of {}",
-                core_data.field_counter,
-                core_data.fln,
-                core_data.tot_fields
-            ));
-        }
-        core_data.results.num_lines += 1;
-        core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
-    }
-
-    #[inline(always)]
-    fn parse_others(&self, _buf_val: u8, core_data: &mut CoreData) -> Result<ParserState, Error> {
-        core_data.offset += 1;
-        return Ok(ParserState::SkField(SkField{}));
-    }
-}
-
