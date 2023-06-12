@@ -19,6 +19,10 @@ use std::io::{BufRead, Seek};
 use std::io::{SeekFrom};
 #[cfg(not(feature = "mmap"))]
 use std::io::{BufReader};
+#[cfg(feature = "mmap")]
+use std::io::Cursor;
+#[cfg(feature = "mmap")]
+use memmap::MmapOptions;
 use std::str;
 use std::vec::*;
 
