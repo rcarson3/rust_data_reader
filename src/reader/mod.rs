@@ -26,8 +26,7 @@ pub mod int_reader;
 pub mod prim_reader;
 pub mod uint_reader;
 pub mod reader_results;
-// pub mod parser;
-pub mod parser_new;
+pub mod parser;
 pub mod parser_core;
 pub mod parser_utility;
 
@@ -37,8 +36,7 @@ pub use self::prim_reader::*;
 pub use self::uint_reader::*;
 pub use self::macro_src::*;
 pub use self::reader_results::*;
-// pub use self::parser::parse_txt;
-pub use self::parser_new::parse_txt;
+pub use self::parser::parse_txt;
 pub use self::parser_utility::*;
 
 //This value is similar in value to the one found in BurntSushi's CSV buffer size

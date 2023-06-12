@@ -24,10 +24,7 @@ use std::vec::*;
 
 use anyhow::Error;
 use memchr::memchr2_iter;
-#[cfg(feature = "mmap")]
-use std::io::{Cursor};
-#[cfg(feature = "mmap")]
-use memmap::MmapOptions;
+use super::parser_core::{NwLine, ParserState, CoreData};
 
 
 ///parse_txt reads in a data file that is made up any type(s). It parses the data file finding all of the field data and saving off in its raw
@@ -49,20 +46,7 @@ pub fn parse_txt<T>(f: &str, params: &ReaderParams) -> Result<T, Error>
 where
     T: RawReaderParse,
 {
-    //So, we have a couple different states we could be in
-    //nw_line = the beginning of a new line
-    //delim = a delimiter character
-    //space = any white space
-    //field = a field we want to keep
-    //sk_field = a field we want to skip
-    #[derive(Debug, Clone)]
-    enum ParseState {
-        NwLine,
-        Delim,
-        Space,
-        Field,
-        SkField,
-    }
+
     let file = File::open(f)?;
 
     //our comment string
@@ -160,22 +144,17 @@ where
 
     //File line number used for Error information
     let mut fln = 0;
+
+    //If we skip any header lines then we need to skip forward through the file by
+    //the correct number of lines when not taking into account commented lines.
     skip_header_lines(&mut reader, &mut fln, cmt, sk_h);
 
     let current_pos = reader.seek(SeekFrom::Current(0))?;
-
-    //We need to count our field variables and set this variable initially outside the main loop.
-    let mut field_counter = 0;
     //We'll need to now the total number of fields later on and set this variable initially outside the main loop.
     let tot_fields = count_num_fields(&mut reader, cmt, delim, delim_ws);
-
     //We need to rewind our file back to the start.
     reader.seek(SeekFrom::Start(current_pos))?;
 
-    //We are now going to loop through everything until we either reach the last line we need or we reach EOF.
-    //We need to first set our state to being start of a line.
-
-    let mut state = ParseState::NwLine;
     //Next we need to get a list of our columns we might be using. If we aren't we supply an empty vector, so we can easily check if the len is 0.
     //While these values are 0 indexed externally, internally it's a bit easier to deal with 1-based indexing for the time being.
     let cols = match &params.usecols {
@@ -191,12 +170,29 @@ where
         None => Vec::<usize>::new(),
     };
 
-    let nfields = if !cols.is_empty() { cols.len() } else { tot_fields }; 
+    let nfields = if !cols.is_empty() { cols.len() } else { tot_fields };
     //We are initializing our ReaderResult structure
     let mut results:T = T::new(nfields, num_lines_read);
-    let mut num_lines = 0;
+
+    let mut core_data = CoreData::<T>{
+        length: 0,
+        offset: 0,
+        cmt: cmt,
+        delim_ws: delim_ws,
+        delim: delim,
+        fln: fln,
+        cols: & cols,
+        field_counter: 0,
+        current_field: 0,
+        tot_fields: tot_fields,
+        results: &mut results,
+    };
+
     //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're essentially running a poorly optimized
     //state machine. However, it turns out that this works decent enough for our purposes as long as the optimizer is used.
+
+    let mut state = ParserState::NwLine(NwLine{});
+
     loop {
         //We first find the length of our buffer
         let length = {
@@ -205,293 +201,30 @@ where
             //We're now going to use an explicit loop.
             //I know this isn't idiomatic rust, but I couldn't really see a good way of skipping my iterator
             //to a location of my choosing.
-            let mut i = 0;
+            core_data.offset = 0;
             //We're using the memchr crate to locate all of the most common newline characters
             //It provides a nice iterator over our buffer that we can now use.
             let mut newline = memchr2_iter(b'\n', b'\r', buffer);
 
             //We don't want our loop index to go past our buffer length or else bad things could occur
-            let length = buffer.len();
+            core_data.length = buffer.len();
             //Keeping it old school with some nice wild loops
-            while i < length {
-                //Here's where the main magic occurs
-                //If we come across a delimiter and we're not using white space as our delimiter we base everything we do based on our previous state.
-                //If we come across a space or tab we move to the next item in the buffer unless we're using whitespace as delimiter in which case we do
-                //everything we were doing with the delimiter case
-                //If we come across a newline character we advance our iterator and move onto the
-                //next item in the buffer. We also check that our total number of fields are what they should be and if they aren't we error out. Other things
-                //to note are that outside of the comment and delimiter character case this is the only other place where we'll push the end index for
-                //our raw data that we've come across.
-                //If we come across a comment character first (white spaces aren't counted) we completely skip the rest of the line.
-                //If we come across any other character first (white spaces aren't counted) then we're in a field and we check to see if its one we should skip or not.
-                //If it is then we set our state to being a skipped field and until we come across a delimiter, comment, or newline we do nothing. The other case is we
-                //we do want the field, and so we save the data off for later uses.
-                //If we no longer have an item in our newline iterator we're done with everything in our buffer, and so
-                //we can exit the loop. However, our state is preserved between loops.
-                if (buffer[i] == delim) & !delim_ws {
-                    state = match state {
-                        ParseState::NwLine => {
-                            field_counter = 1;
-                            ParseState::Delim
-                        }
-                        ParseState::Delim => ParseState::Delim,
-                        ParseState::SkField => {
-                            field_counter += 1;
-                            ParseState::Delim
-                        }
-                        ParseState::Field => {
-                            field_counter += 1;
-                            results.set_index(field_counter);
-                            ParseState::Delim
-                        }
-                        ParseState::Space => {
-                            field_counter += 1;
-                            ParseState::Delim
-                        }
-                    };
-                    i += 1;
-                } else if (buffer[i] == b' ') | (buffer[i] == b'\t') {
-                    if delim_ws {
-                        state = match state {
-                            ParseState::NwLine => {
-                                field_counter = 1;
-                                ParseState::Delim
-                            }
-                            ParseState::Delim => ParseState::Delim,
-                            ParseState::SkField => {
-                                field_counter += 1;
-                                ParseState::Delim
-                            }
-                            ParseState::Field => {
-                                field_counter += 1;
-                                results.set_index(field_counter);
-                                ParseState::Delim
-                            }
-                            ParseState::Space => {
-                                field_counter += 1;
-                                ParseState::Delim
-                            }
-                        };
-                    } else {
-                        state = match state {
-                            ParseState::NwLine => ParseState::Space,
-                            ParseState::Delim => ParseState::Space,
-                            ParseState::SkField => ParseState::SkField,
-                            ParseState::Field => ParseState::Field,
-                            ParseState::Space => ParseState::Space,
-                        };
-                    }
-                    i += 1;
-                } else if (buffer[i] == b'\n') | (buffer[i] == b'\r') {
-                    let val = newline.next();
-                    i = match val {
-                        Some(val) => val + 1,
-                        None => length,
-                    };
-                    fln += 1;
-                    state = match state {
-                        ParseState::NwLine => ParseState::NwLine,
-                        ParseState::Delim => {
-                            if delim_ws {
-                                field_counter -= 1;
-                                if (field_counter != tot_fields) & (field_counter != 0) {
-                                    return Err(format_err!(
-                                        "Newline (delim) Number of fields,{}, provided at line {} 
-                                        is different than the initial field number of {}",
-                                        field_counter,
-                                        fln,
-                                        tot_fields
-                                    ));
-                                }
-                                field_counter = 0;
-                                num_lines += 1;
-                            } else {
-                                return Err(format_err!(
-                                    "Number of fields provided at line {} 
-                                    ends with a delimiter instead of a field or white space",
-                                    fln
-                                ));
-                            }
-                            ParseState::NwLine
-                        }
-                        ParseState::SkField => {
-                            if field_counter != tot_fields {
-                                return Err(format_err!(
-                                    "Newline (skip field) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}",
-                                    field_counter,
-                                    fln,
-                                    tot_fields
-                                ));
-                            }
-                            num_lines += 1;
-                            field_counter = 0;
-                            ParseState::NwLine
-                        }
-                        ParseState::Field => {
-                            results.set_index(field_counter);
-                            if field_counter != tot_fields {
-                                return Err(format_err!(
-                                    "Newline (field) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}",
-                                    field_counter,
-                                    fln,
-                                    tot_fields
-                                ));
-                            }
-                            num_lines += 1;
-                            field_counter = 0;
-                            ParseState::NwLine
-                        }
-                        ParseState::Space => ParseState::NwLine,
-                    };
-                } else if buffer[i] == cmt {
-                    let val = newline.next();
-                    i = match val {
-                        Some(val) => val + 1,
-                        None => length,
-                    };
-                    fln += 1;
-                    state = match state {
-                        ParseState::NwLine => ParseState::NwLine,
-                        ParseState::Delim => {
-                            if delim_ws {
-                                field_counter -= 1;
-                                if (field_counter != tot_fields) & (field_counter != 0) {
-                                    return Err(format_err!(
-                                        "Cmt (delim) Number of fields,{}, provided at line {} 
-                                        is different than the initial field number of {}",
-                                        field_counter,
-                                        fln,
-                                        tot_fields
-                                    ));
-                                }
-                                if field_counter > 0 {
-                                    field_counter = 0;
-                                    num_lines += 1;
-                                }
-                            } else {
-                                return Err(format_err!(
-                                    "Number of fields provided at line {} 
-                                    ends with a delimiter instead of a field or white space",
-                                    fln
-                                ));
-                            }
-                            ParseState::NwLine
-                        }
-                        ParseState::SkField => {
-                            if field_counter != tot_fields {
-                                return Err(format_err!(
-                                    "Cmt (skip field) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}",
-                                    field_counter,
-                                    fln,
-                                    tot_fields
-                                ));
-                            }
-                            num_lines += 1;
-                            field_counter = 0;
-                            ParseState::NwLine
-                        }
-                        ParseState::Field => {
-                            results.set_index(field_counter);
-                            if field_counter != tot_fields {
-                                return Err(format_err!(
-                                    "Cmt (field) Number of fields,{}, provided at line {} 
-                                    is different than the initial field number of {}",
-                                    field_counter,
-                                    fln,
-                                    tot_fields
-                                ));
-                            }
-                            num_lines += 1;
-                            field_counter = 0;
-                            ParseState::NwLine
-                        }
-                        ParseState::Space => ParseState::NwLine,
-                    };
-                } else {
-                    state = match state {
-                        ParseState::NwLine => {
-                            field_counter = 1;
-                            match &cols.len() {
-                                0 => {
-                                    results.set_results(buffer[i], field_counter);
-                                    ParseState::Field
-                                }
-                                _ => {
-                                    let pos = cols.iter().position(|&x| x == field_counter);
-                                    match pos {
-                                        Some(x) => {
-                                            results.set_results(buffer[i], x);
-                                            ParseState::Field
-                                        }
-                                        None => ParseState::SkField,
-                                    }
-                                }
-                            }
-                        }
-                        ParseState::Delim => match &cols.len() {
-                            0 => {
-                                results.set_results(buffer[i], field_counter);
-                                ParseState::Field
-                            }
-                            _ => {
-                                let pos = cols.iter().position(|&x| x == field_counter);
-                                match pos {
-                                    Some(x) => {
-                                        results.set_results(buffer[i], x);
-                                        ParseState::Field
-                                    }
-                                    None => ParseState::SkField,
-                                }
-                            }
-                        },
-                        ParseState::SkField => ParseState::SkField,
-                        ParseState::Field => {
-                            results.set_results(buffer[i], field_counter);
-                            ParseState::Field
-                        }
-                        ParseState::Space => {
-                            //The case where we start out with spaces before our 1st field at the start of a line
-                            if field_counter == 0 {
-                                field_counter += 1;
-                            }
-                            match &cols.len() {
-                                0 => {
-                                    results.set_results(buffer[i], field_counter);
-                                    ParseState::Field
-                                }
-                                _ => {
-                                    let pos = cols.iter().position(|&x| x == field_counter);
-                                    match pos {
-                                        Some(x) => {
-                                            results.set_results(buffer[i], x);
-                                            ParseState::Field
-                                        }
-                                        None => ParseState::SkField,
-                                    }
-                                }
-                            }
-                        }
-                    };
-                    i += 1;
-                }
+            while core_data.offset < core_data.length {
+                state = state.next(buffer, &mut newline, &mut core_data)?;
                 //Check to see if we've read enough lines in if so break out of the loop
-                if num_lines == num_lines_read {
+                if core_data.results.get_num_lines() == num_lines_read {
                     break;
                 }
             }
-            length
+            core_data.length
         };
         //We now need to consume everything in our buffer, so it's marked off as no longer being needed
         reader.consume(length);
         //If our length is less than our fixed buffer size we've reached the end of our file and can now exit.
-        if (length < BUF_SIZE) | (num_lines == num_lines_read) {
+        if (length < BUF_SIZE) | (core_data.results.get_num_lines() == num_lines_read) {
             break;
         }
     }
-    results.set_num_lines(num_lines);
     //Assumming everything went well we save off our results.
     Ok(results)
 }
