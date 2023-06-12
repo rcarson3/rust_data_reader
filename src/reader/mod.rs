@@ -62,7 +62,9 @@ pub enum Delimiter {
 ///     where these values should be >= 0. Values are 0 indexed here.
 ///
 /// max_rows - an optional field that tells us the maximum number of rows we should use from the file
-/// is_string - an optional field that tells us if the string passed is a string or file
+/// row_format - a required field that tells us whether or not the file should be read in row major or column major
+///              Using ..Default::default() it defaults to being true to preserve old behavior of the code.
+// is_string - an optional field that tells us if the string passed is a string or file
 pub struct ReaderParams {
     pub comments: Option<u8>,
     pub delimiter: Delimiter,
