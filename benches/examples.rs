@@ -99,10 +99,10 @@ fn test_wrapper(c: &mut Criterion) {
 
     group.sample_size(10);
     group.bench_function("Load_txt_float", |b| {
-        b.iter(|| load_txt_f64_large_test())
+        b.iter(load_txt_f64_large_test)
     });
     group.bench_function("Parse_txt_float", |b| {
-        b.iter(|| parser_txt_large_test())
+        b.iter(parser_txt_large_test)
     });
     // group.bench_function("Load_txt_float_col", |b| {
     //     b.iter(|| load_txt_f64_col_large_test())

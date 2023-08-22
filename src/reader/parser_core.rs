@@ -80,7 +80,7 @@ impl Parser for NwLine {
         let buf_val = buffer[core_data.offset];
         if (buf_val == core_data.delim) & !core_data.delim_ws
         {
-            return self.parse_delim(core_data);
+            self.parse_delim(core_data)
         }
         else if (buf_val == b' ') | (buf_val == b'\t') {
             return self.parse_whitespace(core_data);
@@ -96,7 +96,7 @@ impl Parser for NwLine {
     fn parse_delim<RRP: RawReaderParse>(&self, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.field_counter = 1;
         core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
+        Ok(ParserState::Delim(Delim{}))
     }
 
     #[inline(always)]
@@ -104,11 +104,11 @@ impl Parser for NwLine {
         if core_data.delim_ws {
             core_data.field_counter = 1;
             core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
+            Ok(ParserState::Delim(Delim{}))
         }
         else {
             core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
+            Ok(ParserState::Space(Space{}))
         }
     }
 
@@ -120,12 +120,12 @@ impl Parser for NwLine {
             None => core_data.length,
         };
         core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
     fn parse_comment<RRP: RawReaderParse>(&self, newline: &mut Memchr2, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
-        return self.parse_newline(newline, core_data);
+        self.parse_newline(newline, core_data)
     }
 
     #[inline(always)]
@@ -136,7 +136,7 @@ impl Parser for NwLine {
             0 => {
                 core_data.current_field = 1;
                 core_data.results.set_results(buf_val, core_data.field_counter);
-                return Ok(ParserState::Field(Field{}));
+                Ok(ParserState::Field(Field{}))
             }
             _ => {
                 let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
@@ -144,10 +144,10 @@ impl Parser for NwLine {
                     Some(x) => {
                         core_data.current_field = x + 1;
                         core_data.results.set_results(buf_val, core_data.current_field);
-                        return Ok(ParserState::Field(Field{}));
+                        Ok(ParserState::Field(Field{}))
                     }
                     None => {
-                        return Ok(ParserState::SkField(SkField{}));
+                        Ok(ParserState::SkField(SkField{}))
                     }
                 }
             }
@@ -161,7 +161,7 @@ impl Parser for Delim {
         let buf_val = buffer[core_data.offset];
         if (buf_val == core_data.delim) & !core_data.delim_ws
         {
-            return self.parse_delim(core_data);
+            self.parse_delim(core_data)
         }
         else if (buf_val == b' ') | (buf_val == b'\t') {
             return self.parse_whitespace(core_data);
@@ -180,18 +180,18 @@ impl Parser for Delim {
     #[inline(always)]
     fn parse_delim<RRP: RawReaderParse>(&self, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
+        Ok(ParserState::Delim(Delim{}))
     }
 
     #[inline(always)]
     fn parse_whitespace<RRP: RawReaderParse>(&self, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         if core_data.delim_ws {
             core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
+            Ok(ParserState::Delim(Delim{}))
         }
         else {
             core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
+            Ok(ParserState::Space(Space{}))
         }
     }
 
@@ -224,7 +224,7 @@ impl Parser for Delim {
                 core_data.fln
             ));
         }
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -258,7 +258,7 @@ impl Parser for Delim {
                 core_data.fln
             ));
         }
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -268,7 +268,7 @@ impl Parser for Delim {
             0 => {
                 core_data.current_field = core_data.field_counter;
                 core_data.results.set_results(buf_val, core_data.field_counter);
-                return Ok(ParserState::Field(Field{}));
+                Ok(ParserState::Field(Field{}))
             }
             _ => {
                 let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
@@ -276,10 +276,10 @@ impl Parser for Delim {
                     Some(x) => {
                         core_data.current_field = x + 1;
                         core_data.results.set_results(buf_val, core_data.current_field);
-                        return Ok(ParserState::Field(Field{}));
+                        Ok(ParserState::Field(Field{}))
                     }
                     None => {
-                        return Ok(ParserState::SkField(SkField{}));
+                        Ok(ParserState::SkField(SkField{}))
                     }
                 }
             }
@@ -293,7 +293,7 @@ impl Parser for Space {
         let buf_val = buffer[core_data.offset];
         if (buf_val == core_data.delim) & !core_data.delim_ws
         {
-            return self.parse_delim(core_data);
+            self.parse_delim(core_data)
         }
         else if (buf_val == b' ') | (buf_val == b'\t') {
             return self.parse_whitespace(core_data);
@@ -313,7 +313,7 @@ impl Parser for Space {
     fn parse_delim<RRP: RawReaderParse>(&self, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.field_counter += 1;
         core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
+        Ok(ParserState::Delim(Delim{}))
     }
 
     #[inline(always)]
@@ -321,11 +321,11 @@ impl Parser for Space {
         if core_data.delim_ws {
             core_data.field_counter += 1;
             core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
+            Ok(ParserState::Delim(Delim{}))
         }
         else {
             core_data.offset += 1;
-            return Ok(ParserState::Space(Space{}));
+            Ok(ParserState::Space(Space{}))
         }
     }
 
@@ -337,7 +337,7 @@ impl Parser for Space {
             None => core_data.length,
         };
         core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -348,7 +348,7 @@ impl Parser for Space {
             None => core_data.length,
         };
         core_data.fln += 1;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -362,7 +362,7 @@ impl Parser for Space {
             0 => {
                 core_data.current_field = core_data.field_counter;
                 core_data.results.set_results(buf_val, core_data.field_counter);
-                return Ok(ParserState::Field(Field{}));
+                Ok(ParserState::Field(Field{}))
             }
             _ => {
                 let pos = core_data.cols.iter().position(|&x| x == core_data.field_counter);
@@ -370,10 +370,10 @@ impl Parser for Space {
                     Some(x) => {
                         core_data.current_field = x + 1;
                         core_data.results.set_results(buf_val, core_data.current_field);
-                        return Ok(ParserState::Field(Field{}));
+                        Ok(ParserState::Field(Field{}))
                     }
                     None => {
-                        return Ok(ParserState::SkField(SkField{}));
+                        Ok(ParserState::SkField(SkField{}))
                     }
                 }
             }
@@ -387,7 +387,7 @@ impl Parser for Field {
         let buf_val = buffer[core_data.offset];
         if (buf_val == core_data.delim) & !core_data.delim_ws
         {
-            return self.parse_delim(core_data);
+            self.parse_delim(core_data)
         }
         else if (buf_val == b' ') | (buf_val == b'\t') {
             return self.parse_whitespace(core_data);
@@ -408,7 +408,7 @@ impl Parser for Field {
         core_data.field_counter += 1;
         core_data.offset += 1;
         core_data.results.set_index(core_data.current_field);
-        return Ok(ParserState::Delim(Delim{}));
+        Ok(ParserState::Delim(Delim{}))
     }
 
     #[inline(always)]
@@ -417,11 +417,11 @@ impl Parser for Field {
             core_data.field_counter += 1;
             core_data.results.set_index(core_data.current_field);
             core_data.offset += 1;
-            return Ok(ParserState::Delim(Delim{}));
+            Ok(ParserState::Delim(Delim{}))
         }
         else {
             core_data.offset += 1;
-            return Ok(ParserState::Field(Field{}));
+            Ok(ParserState::Field(Field{}))
         }
     }
 
@@ -445,7 +445,7 @@ impl Parser for Field {
         }
         core_data.results.incr_num_lines();
         core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -468,14 +468,14 @@ impl Parser for Field {
         }
         core_data.results.incr_num_lines();
         core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
     fn parse_others<RRP: RawReaderParse>(&self, buf_val: u8, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.offset += 1;
         core_data.results.set_results(buf_val, core_data.current_field);
-        return Ok(ParserState::Field(Field{}));
+        Ok(ParserState::Field(Field{}))
     }
 
 
@@ -487,7 +487,7 @@ impl Parser for SkField {
         let buf_val = buffer[core_data.offset];
         if (buf_val == core_data.delim) & !core_data.delim_ws
         {
-            return self.parse_delim(core_data);
+            self.parse_delim(core_data)
         }
         else if (buf_val == b' ') | (buf_val == b'\t') {
             return self.parse_whitespace(core_data);
@@ -507,7 +507,7 @@ impl Parser for SkField {
     fn parse_delim<RRP: RawReaderParse>(&self, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.field_counter += 1;
         core_data.offset += 1;
-        return Ok(ParserState::Delim(Delim{}));
+        Ok(ParserState::Delim(Delim{}))
     }
 
     #[inline(always)]
@@ -515,11 +515,11 @@ impl Parser for SkField {
         if core_data.delim_ws {
             core_data.offset += 1;
             core_data.field_counter += 1;
-            return Ok(ParserState::Delim(Delim{}));
+            Ok(ParserState::Delim(Delim{}))
         }
         else {
             core_data.offset += 1;
-            return Ok(ParserState::SkField(SkField{}));
+            Ok(ParserState::SkField(SkField{}))
         }
     }
 
@@ -542,7 +542,7 @@ impl Parser for SkField {
         }
         core_data.results.incr_num_lines();
         core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
@@ -564,13 +564,13 @@ impl Parser for SkField {
         }
         core_data.results.incr_num_lines();
         core_data.field_counter = 0;
-        return Ok(ParserState::NwLine(NwLine{}));
+        Ok(ParserState::NwLine(NwLine{}))
     }
 
     #[inline(always)]
     fn parse_others<RRP: RawReaderParse>(&self, _buf_val: u8, core_data: &mut CoreData<RRP>) -> Result<ParserState, Error> {
         core_data.offset += 1;
-        return Ok(ParserState::SkField(SkField{}));
+        Ok(ParserState::SkField(SkField{}))
     }
 }
 

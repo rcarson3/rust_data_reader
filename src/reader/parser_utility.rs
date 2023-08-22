@@ -21,7 +21,7 @@ use super::*;
 ///A private function that counts the number of lines that match a specified character specified to it.
 ///It is assumed that this character only appears once per line.
 fn count_lines(buf: &[u8], eol: u8) -> usize {
-    bytecount::count(buf, eol) as usize
+    bytecount::count(buf, eol)
 }
 
 /// It simply reads all of the lines in the file when an end of line is denoted by \n.
@@ -259,10 +259,7 @@ pub fn count_num_fields<R: BufRead>(reader:&mut R, cmt: u8, delim: u8, delim_ws:
                         };
                     }
                     else {
-                        match state {
-                            ParseState::Delim => field_counter -= 1,
-                            _ => (),
-                        }
+                        if let ParseState::Delim = state { field_counter -= 1 };
                         return field_counter;
                     }
                 }

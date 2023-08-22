@@ -153,7 +153,7 @@ where
     //the correct number of lines when not taking into account commented lines.
     skip_header_lines(&mut reader, &mut fln, cmt, sk_h);
 
-    let current_pos = reader.seek(SeekFrom::Current(0))?;
+    let current_pos = reader.stream_position()?;
     //We'll need to now the total number of fields later on and set this variable initially outside the main loop.
     let tot_fields = count_num_fields(&mut reader, cmt, delim, delim_ws);
     //We need to rewind our file back to the start.
@@ -181,14 +181,14 @@ where
     let mut core_data = CoreData::<T>{
         length: 0,
         offset: 0,
-        cmt: cmt,
-        delim_ws: delim_ws,
-        delim: delim,
-        fln: fln,
+        cmt,
+        delim_ws,
+        delim,
+        fln,
         cols: & cols,
         field_counter: 0,
         current_field: 0,
-        tot_fields: tot_fields,
+        tot_fields,
         results: &mut results,
     };
 
