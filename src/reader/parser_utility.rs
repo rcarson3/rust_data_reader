@@ -25,6 +25,7 @@ fn count_lines(buf: &[u8], eol: u8) -> usize {
 }
 
 /// It simply reads all of the lines in the file when an end of line is denoted by \n.
+///
 /// It does not take into account whether any line is a comment or not.
 pub fn read_num_file_tot_lines<R: BufRead>(reader: &mut R) -> usize {
     let mut count = 0;
@@ -104,7 +105,12 @@ pub fn read_num_file_lines<R: BufRead>(reader: & mut R, com: u8) -> usize {
     count
 }
 
-pub fn skip_header_lines<R: BufRead>(reader: & mut R, fln: &mut usize, cmt: u8, sk_h: usize) {
+/// Public crate function that skips some number of given:
+/// reader - a mutable reference to a type that implements the BufRead trait
+/// fln - the current line that the reader is on
+/// cmt - the comment character as a u8 character 
+/// sk_h - the number of lines that we've want to skip not counting the comment character
+pub(crate) fn skip_header_lines<R: BufRead>(reader: & mut R, fln: &mut usize, cmt: u8, sk_h: usize) {
     //If we skip any header lines then we need to skip forward through the file by
     //the correct number of lines when not taking into account commented lines.
     if sk_h > 0 {
@@ -172,6 +178,12 @@ pub fn skip_header_lines<R: BufRead>(reader: & mut R, fln: &mut usize, cmt: u8, 
     }
 }
 
+/// Counts the total number of fields within the file
+/// reader - a mutable reference to a type that implements the BufRead trait
+/// cmt - the comment character as a u8 character 
+/// delim - the delimiter character as a u8 character that tells us when we go
+///         from one field to another
+/// delim_ws - whether or not our delimiter is any white space character that is not a \n or \r character
 pub fn count_num_fields<R: BufRead>(reader:&mut R, cmt: u8, delim: u8, delim_ws: bool) -> usize {
     let mut field_counter = 0;
 

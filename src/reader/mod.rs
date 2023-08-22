@@ -21,13 +21,20 @@ use std::str;
 #[doc(hidden)]
 mod macro_src;
 
+/// Contains various float type readers
 pub mod float_reader;
+/// Contains various integer type readers
 pub mod int_reader;
+/// Contains various primitive type readers that don't fit into the other reader modules
 pub mod prim_reader;
+/// Contains various unsigned integer type readers
 pub mod uint_reader;
+/// Contains the results from parse_txt or load_txt!
 pub mod reader_results;
+/// Contains the functions that will parse a file and return a RawReaderResults
 pub mod parser;
-pub mod parser_core;
+pub(crate) mod parser_core;
+/// Contains a couple functions that are useful for parsing files
 pub mod parser_utility;
 
 pub use self::float_reader::*;

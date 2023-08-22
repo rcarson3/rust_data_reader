@@ -16,7 +16,7 @@
 use std::str::FromStr;
 use std::vec::*;
 
-///A structure that contains all of the results. It tells us the number of fields we had
+///A structure that contains all of the results in row major order. It tells us the number of fields we had
 ///along with the number of lines that we read. Finally, the results are stored in a single Vec of
 ///type T. Type T is what type one called load_txt_* for.
 #[derive(Debug, Clone)]
@@ -29,7 +29,7 @@ where
     pub results: Vec<T>,
 }
 
-///A structure that contains all of the results. It tells us the number of fields we had
+///A structure that contains all of the results in column major order. It tells us the number of fields we had
 ///along with the number of lines that we read. Finally, the results are stored in a single Vec of
 ///type T. Type T is what type one called load_txt_* for.
 #[derive(Debug, Clone)]
