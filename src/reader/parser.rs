@@ -192,8 +192,8 @@ where
         results: &mut results,
     };
 
-    //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're essentially running a poorly optimized
-    //state machine. However, it turns out that this works decent enough for our purposes as long as the optimizer is used.
+    //The loop here is where all of the magic happens. It's designed so that it operates based on a state. So, we're running a 
+    //state machine to process everything. The optimizer is able to do a fairly decent job in turning this into performant code.
 
     let mut state = ParserState::NwLine(NwLine{});
 
